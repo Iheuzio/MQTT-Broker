@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  MotionDetection:
+    image: motionDetection
+    container_name: motionDetection
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5080:80"
