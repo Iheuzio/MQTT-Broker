@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace web_api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("weather-forecast")]
 public class WeatherForecastController : ControllerBase
 {
     private static readonly string[] _conditions = new[]
@@ -24,7 +24,7 @@ public class WeatherForecastController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("postal-code/{postalCode}", Name = "GetWeatherForecast")]
+    [HttpGet("postal-code/{postalCode}", Name = "weather-forecast")]
     [ProducesResponseType(typeof(IEnumerable<WeatherForecast>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
@@ -36,11 +36,21 @@ public class WeatherForecastController : ControllerBase
         {
             return NotFound("Unknown Postal Code");
         }
+        var conditions = _conditions[Random.Shared.Next(_conditions.Length)];
+        string intencity;
+        // for conditions with intencity, generate it
+        if (conditions == "Snowfall" || conditions == "Rain")
+        {
+            intencity = _intensities[Random.Shared.Next(_conditions.Length - 1)];
+        }
+        // for other conditions, set to n/a (last element in array)
+        else intencity = _intensities[_conditions.Length - 1];
         return new WeatherForecast
         {
             Datetime = DateTime.Now,
             TemperatureC = Random.Shared.Next(-40, 40),
-            Conditions = _conditions[Random.Shared.Next(_conditions.Length)],
+            Conditions = conditions,
+            Intencity = intencity,
             //return postal code from the request
             PostalCode = postalCode
         };

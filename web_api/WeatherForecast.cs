@@ -10,5 +10,7 @@ public class WeatherForecast
 
     public string? Conditions { get; set; }
 
+    public string? Intencity { get; set; }
+
     public string? PostalCode { get; set; }
 }
