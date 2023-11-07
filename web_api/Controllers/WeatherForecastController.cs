@@ -37,20 +37,20 @@ public class WeatherForecastController : ControllerBase
             return NotFound("Unknown Postal Code");
         }
         var conditions = _conditions[Random.Shared.Next(_conditions.Length)];
-        string intencity;
-        // for conditions with intencity, generate it
+        string intensity;
+        // for conditions with intensity, generate it
         if (conditions == "Snowfall" || conditions == "Rain")
         {
-            intencity = _intensities[Random.Shared.Next(_conditions.Length - 1)];
+            intensity = _intensities[Random.Shared.Next(_conditions.Length - 1)];
         }
         // for other conditions, set to n/a (last element in array)
-        else intencity = _intensities[_conditions.Length - 1];
+        else intensity = _intensities[_conditions.Length - 1];
         return new WeatherForecast
         {
             Datetime = DateTime.Now,
             TemperatureC = Random.Shared.Next(-40, 40),
             Conditions = conditions,
-            Intencity = intencity,
+            Intensity = intensity,
             //return postal code from the request
             PostalCode = postalCode
         };
