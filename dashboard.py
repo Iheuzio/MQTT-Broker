@@ -24,7 +24,8 @@ def create_thermometer(id_suffix):
         ),
         html.Div([
             html.Div(id=f'my-thermometer-{id_suffix}-datetime'),
-            html.Div(id=f'my-thermometer-{id_suffix}-conditions')
+            html.Div(id=f'my-thermometer-{id_suffix}-conditions'),
+            html.Div(id=f'my-thermometer-{id_suffix}-intensities')
         ], style={'display': 'flex', 'flex-direction': 'column'})
     ], style={'display': 'flex', 'flex-direction': 'column', 'margin-right': '5%'})
 
@@ -53,6 +54,8 @@ time = datetime.datetime.now()
         Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
     ] + [
         Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
+    ] + [
+        Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
     ],
     Input('interval-component', 'n_intervals')
 )
@@ -75,12 +78,14 @@ def update_thermometer(n):
         values = []
         dates = []
         conditions = []
+        intensities = []
 
         values.append(response_json['temperatureC'])
         dates.append(response_json['datetime'])
         conditions.append(response_json['conditions'])
+        intensities.append(response_json['intensity'])
 
-        return [value for value in values + dates + conditions]
+        return [value for value in values + dates + conditions + intensities]
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', threaded=False)

@@ -2,7 +2,7 @@ namespace web_api;
 
 public class WeatherForecast
 {
-    public DateTime Datetime { get; set; }
+    public string? Datetime { get; set; }
 
     public int TemperatureC { get; set; }
 

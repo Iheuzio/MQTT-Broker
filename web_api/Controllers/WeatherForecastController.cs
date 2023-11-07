@@ -47,7 +47,7 @@ public class WeatherForecastController : ControllerBase
         else intensity = _intensities[_conditions.Length - 1];
         return new WeatherForecast
         {
-            Datetime = DateTime.Now,
+            Datetime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             TemperatureC = Random.Shared.Next(-40, 40),
             Conditions = conditions,
             Intensity = intensity,
