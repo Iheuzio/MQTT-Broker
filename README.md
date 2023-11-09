@@ -15,7 +15,7 @@
 1. Clone the repository
 
 ```bash
-git clone https://gitlab.com/-/ide/project/yuryev/fall2023datacomassignment2/
+git clone https://gitlab.com/yuryev/fall2023datacomassignment2/
 cd fall2023datacomassignment2
 ```
 
@@ -50,7 +50,7 @@ python3 dashboard.py
 1. Clone the repository
 
 ```powershell
-git clone https://gitlab.com/-/ide/project/yuryev/fall2023datacomassignment2/
+git clone https://gitlab.com/yuryev/fall2023datacomassignment2/
 cd fall2023datacomassignment2
 ```
 
