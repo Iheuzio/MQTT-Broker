@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  WeatherMock:
-    image: weathermock
-    container_name: weathermock
+  WeatherForecast:
+    image: weatherforecast
+    container_name: weatherforecast
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,3 +11,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5080:80"
+  MotionDetection:
+    image: motiondetection
+    container_name: motiondetection
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5081:80"
