@@ -74,7 +74,7 @@ def update_thermometer(n):
     
     with update_lock:
         try:
-            url = "http://localhost:5226/weather-forecast/postal-code/M9A1A8"
+            url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
             response = requests.get(url)
             response_json = response.json()
             # print(response_json)
