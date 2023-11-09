@@ -5,10 +5,8 @@ import json
 import threading
 from dash import Dash, html, dcc, Input, Output, no_update
 import dash_daq as daq
-from flask import Flask, jsonify, request
 
-server = Flask(__name__)
-app = Dash(__name__, server=server)
+app = Dash(__name__)
 
 def create_thermometer(id_suffix):
     return html.Div([
@@ -22,19 +20,20 @@ def create_thermometer(id_suffix):
             units='C',
             style={
                 'display': 'inline-block',
-                'margin-bottom': '5%' if id_suffix != '1' else '0'
+                'marginBottom': '5%' if id_suffix != '1' else '0'
             }
         ),
         html.Div([
-            html.Div(id=f'my-thermometer-{id_suffix}-date'),
-            html.Div(id=f'my-thermometer-{id_suffix}-summary')
-        ], style={'display': 'flex', 'flex-direction': 'column'})
-    ], style={'display': 'flex', 'flex-direction': 'column', 'margin-right': '5%'})
+            html.Div(id=f'my-thermometer-{id_suffix}-datetime'),
+            html.Div(id=f'my-thermometer-{id_suffix}-conditions'),
+            html.Div(id=f'my-thermometer-{id_suffix}-intensities')
+        ], style={'display': 'flex', 'flexDirection': 'column'})
+    ], style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '5%'})
 
 app.layout = html.Div([
     *[
         create_thermometer(str(i))
-        for i in range(1, 6)
+        for i in range(1, 2)
     ],
     dcc.Interval(
         id='interval-component',
@@ -45,11 +44,11 @@ app.layout = html.Div([
         dcc.Location(id='url', refresh=False),
         html.Div([
             dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
-        ], style={'margin-top': '5%'})
-    ], style={'margin-top': '5%'})
+        ], style={'marginTop': '5%'})
+    ], style={'marginTop': '5%'})
 ], style={
     'display': 'flex',
-    'flex-direction': 'row',
+    'flexDirection': 'row',
 })
 
 update_lock = threading.Lock()
@@ -57,11 +56,13 @@ time = datetime.datetime.now()
 
 @app.callback(
     [
-        Output(f'my-thermometer-{i}', 'value') for i in range(1, 6)
+        Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
     ] + [
-        Output(f'my-thermometer-{i}-date', 'children') for i in range(1, 6)
+        Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
     ] + [
-        Output(f'my-thermometer-{i}-summary', 'children') for i in range(1, 6)
+        Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
+    ] + [
+        Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
     ],
     Input('interval-component', 'n_intervals')
 )
@@ -74,20 +75,24 @@ def update_thermometer(n):
     
     with update_lock:
         try:
-            url = "http://localhost:5080/WeatherForecast"
+            url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
             response = requests.get(url)
             response_json = response.json()
+            # print(response_json)
         except:
             raise Exception('Could not connect to server')
         
         values = []
         dates = []
-        summaries = []
-        for i in range(5):
-            values.append(response_json[i]['temperatureC'])
-            dates.append(response_json[i]['date'])
-            summaries.append(response_json[i]['summary'])
-        return [value for value in values + dates + summaries]
+        conditions = []
+        intensities = []
+
+        values.append(response_json['temperatureC'])
+        dates.append(response_json['datetime'])
+        conditions.append(response_json['conditions'])
+        intensities.append(response_json['intensity'])
+        
+        return [value for value in values + dates + conditions + intensities]
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', threaded=False)
+    app.run(debug=True, host='localhost', threaded=False)

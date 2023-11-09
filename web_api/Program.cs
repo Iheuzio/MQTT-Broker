@@ -20,6 +20,15 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.Use(async (context, next) =>
+{
+    await next();
+    if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+    {
+        await context.Response.WriteAsync("Resource not found.");
+    }
+});
+
 app.MapControllers();
 
 app.Run();
