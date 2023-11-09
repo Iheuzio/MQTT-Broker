@@ -89,24 +89,5 @@ def update_thermometer(n):
             summaries.append(response_json[i]['summary'])
         return [value for value in values + dates + summaries]
 
-# MotionDetectionController (should not use route here, must use the controller)
-# http://localhost:5081/motiondetection?postal_code=M5S%201A1
-@server.route('/motiondetection')
-def motion_detection():
-    postal_code = request.args.get('postal_code')
-    if not postal_code:
-        return jsonify({'error': 'Postal code not provided'}), 400
-    if postal_code not in ['M9A 1A8', 'M5S 1A1', 'M4W 1A5', 'M6G 1A1', 'M5R 1A6']:
-        return jsonify({'error': 'Invalid postal code'}), 400
-    detection_type = 'motion' if random.randint(0, 1) == 0 else 'collision'
-    detection_value = random.choice([True, False])
-    date_time = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
-    result = {
-        'postal_code': postal_code,
-        'detection': {'type': detection_type, 'value': detection_value},
-        'datetime': date_time
-    }
-    return jsonify(result)
-
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', threaded=False)
