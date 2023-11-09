@@ -15,7 +15,7 @@ public class WeatherForecastController : ControllerBase
         "heavy", "medium", "light", "n/a"
     };
 
-    private readonly List<string> _postalCodes = new List<string> { "M9A1A8", "M5S1A1", "M4W1A5", "M6G1A1", "M5R1A6" };
+    private readonly List<string> _postalCodes = new List<string> { "M9A 1A8", "M5S 1A1", "M4W 1A5", "M6G 1A1", "M5R 1A6" };
 
     private readonly ILogger<WeatherForecastController> _logger;
 

@@ -19,15 +19,15 @@ def create_thermometer(id_suffix):
             units='C',
             style={
                 'display': 'inline-block',
-                'margin-bottom': '5%' if id_suffix != '1' else '0'
+                'marginBottom': '5%' if id_suffix != '1' else '0'
             }
         ),
         html.Div([
             html.Div(id=f'my-thermometer-{id_suffix}-datetime'),
             html.Div(id=f'my-thermometer-{id_suffix}-conditions'),
             html.Div(id=f'my-thermometer-{id_suffix}-intensities')
-        ], style={'display': 'flex', 'flex-direction': 'column'})
-    ], style={'display': 'flex', 'flex-direction': 'column', 'margin-right': '5%'})
+        ], style={'display': 'flex', 'flexDirection': 'column'})
+    ], style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '5%'})
 
 app.layout = html.Div([
     *[
@@ -39,9 +39,15 @@ app.layout = html.Div([
         interval=5 * 1000,  # in milliseconds
         n_intervals=0
     ),
+    html.Div([
+        dcc.Location(id='url', refresh=False),
+        html.Div([
+            dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
+        ], style={'marginTop': '5%'})
+    ], style={'marginTop': '5%'})
 ], style={
     'display': 'flex',
-    'flex-direction': 'row',
+    'flexDirection': 'row',
 })
 
 update_lock = threading.Lock()
@@ -68,7 +74,7 @@ def update_thermometer(n):
     
     with update_lock:
         try:
-            url = "http://localhost:5226/weather-forecast/postal-code/M9A1A8"
+            url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
             response = requests.get(url)
             response_json = response.json()
             # print(response_json)
@@ -84,8 +90,8 @@ def update_thermometer(n):
         dates.append(response_json['datetime'])
         conditions.append(response_json['conditions'])
         intensities.append(response_json['intensity'])
-
+        
         return [value for value in values + dates + conditions + intensities]
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', threaded=False)
+    app.run(debug=True, host='localhost', threaded=False)
