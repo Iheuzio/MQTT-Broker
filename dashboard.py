@@ -41,6 +41,12 @@ app.layout = html.Div([
         interval=5 * 1000,  # in milliseconds
         n_intervals=0
     ),
+    html.Div([
+        dcc.Location(id='url', refresh=False),
+        html.Div([
+            dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
+        ], style={'margin-top': '5%'})
+    ], style={'margin-top': '5%'})
 ], style={
     'display': 'flex',
     'flex-direction': 'row',
@@ -83,7 +89,7 @@ def update_thermometer(n):
             summaries.append(response_json[i]['summary'])
         return [value for value in values + dates + summaries]
 
-# MotionDetectionController
+# MotionDetectionController (should not use route here, must use the controller)
 # http://localhost:5081/motiondetection?postal_code=M5S%201A1
 @server.route('/motiondetection')
 def motion_detection():
