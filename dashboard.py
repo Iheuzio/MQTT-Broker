@@ -5,8 +5,43 @@ import json
 import threading
 from dash import Dash, html, dcc, Input, Output, no_update
 import dash_daq as daq
+import paho.mqtt.client as mqtt
+import jwt
 
 app = Dash(__name__)
+
+# MQTT Configurations
+MQTT_BROKER = "localhost"
+MQTT_TOPIC = "team_topic"
+MQTT_PORT = 1883  # Adjust according to your broker configuration
+
+# JWT Secret Key
+JWT_SECRET = "your_secret_key"
+
+# JWT Token Generation
+def generate_jwt_token():
+    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
+    return token.decode('utf-8')
+
+# MQTT Client Setup
+mqtt_client = mqtt.Client()
+
+# MQTT Callbacks
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+    # Subscribe to the team topic
+    client.subscribe(MQTT_TOPIC)
+
+def on_message(client, userdata, msg):
+    print(f"Received message: {msg.payload.decode()}")
+
+# Set MQTT callbacks
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+
+# Connect to the MQTT broker
+mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
 def create_thermometer(id_suffix):
     return html.Div([
@@ -67,8 +102,6 @@ time = datetime.datetime.now()
     Input('interval-component', 'n_intervals')
 )
 def update_thermometer(n):
-    
-    # check if 5 seconds have passed
     global time
     if (datetime.datetime.now() - time).total_seconds() < 5:
         return no_update
@@ -78,21 +111,23 @@ def update_thermometer(n):
             url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
             response = requests.get(url)
             response_json = response.json()
-            # print(response_json)
-        except:
-            raise Exception('Could not connect to server')
-        
-        values = []
-        dates = []
-        conditions = []
-        intensities = []
 
-        values.append(response_json['temperatureC'])
-        dates.append(response_json['datetime'])
-        conditions.append(response_json['conditions'])
-        intensities.append(response_json['intensity'])
+            # Publish data to MQTT with JWT token
+            jwt_token = generate_jwt_token()
+            payload = {'data': response_json, 'jwt_token': jwt_token}
+            mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
+        except Exception as e:
+            print(f'Error: {e}')
+        
+        values = [response_json['temperatureC']]
+        dates = [response_json['datetime']]
+        conditions = [response_json['conditions']]
+        intensities = [response_json['intensity']]
         
         return [value for value in values + dates + conditions + intensities]
+
+# MQTT Loop
+mqtt_client.loop_start()
 
 if __name__ == '__main__':
     app.run(debug=True, host='localhost', threaded=False)

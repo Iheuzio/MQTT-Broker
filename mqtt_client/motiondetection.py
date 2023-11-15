@@ -10,11 +10,8 @@ broker_address = "your_broker_address"
 broker_port = 1883
 topic = "your_topic"
 
-# Replace with the path to your PEM file
-pem_path = "path_to_your.pem"
-
 # Load the private key for signing
-with open(pem_path, "rb") as file:
+with open("private_key.pem", "rb") as file:
     private_key = RSA.import_key(file.read())
 
 # Callback when the client connects to the broker
@@ -68,7 +65,7 @@ client.connect(broker_address, broker_port, 60)
 # Publish the first message with the public key
 public_key = private_key.publickey().export_key().decode("utf-8")
 first_message = {
-    "public_key": public_key,
+    "data": public_key,
     "signature": sign_data(public_key),
 }
 client.publish(topic, json.dumps(first_message))
