@@ -1,5 +1,22 @@
-# import publisher, subscriber, dashboard
+import signal
+import threading
+from encryption_keys import generate_key_pair, load_keys, sign, verify
+from publisher import Publisher
 
+exit_event = threading.Event()
+def signal_handler(signum, frame):
+    exit_event.set()
+signal.signal(signal.SIGINT, signal_handler)
+
+password = b"password123"
+# generate and store key pair in ./keys directory
+generate_key_pair(password)
+# load private and public keys
+private_key, public_key = load_keys(password)
+# test
+message = b"hello wrld"
+signature = sign(message, private_key)
+print(verify(signature, message, public_key))
 
 # code for traffic light
 
@@ -8,6 +25,9 @@
 
 
 # launch publisher in a thread
+publisher = Publisher(private_key, public_key)
+publisher_th = threading.Thread(target=publisher.loop, args=[exit_event])
+publisher_th.start()
 
 
 # launch dashboard in a thread
@@ -18,3 +38,7 @@
 # loop with traffic light, constantly checking the api's
 # if conditions are met, trigger publish
 # before publish, take picture and include path in the payload
+
+while not exit_event.is_set():
+    # check apis here
+    pass
