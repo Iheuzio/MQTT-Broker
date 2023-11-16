@@ -17,20 +17,29 @@ class Publisher:
     def __on_connect(self, client, userdata, flags, return_code):
         print("CONNACK received with code %s." % return_code)
         if return_code == 0:
-            print("connected")
+            print("publisher connected")
         else:
             print("could not connect, return code:", return_code)
 
     #client.loop_forever()
 
-    def loop(self):
+    def loop(self, exit_event, message):
+        public_key_sent = False
         self.__client.loop_start()
-        topic = "public-keys/Client1"
+        if exit_event.is_set():
+                self.__client.loop_stop()
+        payload = message
         try:
-            result = self.__client.publish(topic=topic, payload=self.__public_key)
+            if not public_key_sent:
+                topic = "public-keys/Client1"
+                payload = str(self.__public_key)
+            else:
+                topic = "event/Client1"
+            result = self.__client.publish(topic=topic, payload=payload)
             status = result[0]
             if status == 0:
-                print("Message "+ str(self.__public_key) + " is published to topic " + topic)
+                print("Message "+ str(payload) + " is published to topic " + topic)
+                public_key_sent = True
             else:
                 print("Failed to send message to topic " + topic)
         finally:
