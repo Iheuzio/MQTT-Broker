@@ -61,7 +61,7 @@ namespace web_api.Controllers
         private bool ValidateJwtToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("your_secret_key");
+            var key = Encoding.ASCII.GetBytes("secretkey");
 
             try
             {

@@ -12,17 +12,11 @@ app = Dash(__name__)
 
 # MQTT Configurations
 MQTT_BROKER = "localhost"
-MQTT_TOPIC = "team_topic"
-MQTT_PORT = 1883  # Adjust according to your broker configuration
+MQTT_TOPIC = "your_topic"
+MQTT_PORT = 1899  # Adjust according to your broker configuration
 
 # JWT Secret Key
-JWT_SECRET = "your_secret_key"
-
-# JWT Token Generation
-def generate_jwt_token():
-    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
-    return token.decode('utf-8')
+JWT_SECRET = "secretkey"
 
 # MQTT Client Setup
 mqtt_client = mqtt.Client()
@@ -41,6 +35,8 @@ mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
 # Connect to the MQTT broker
+mqtt_client.username_pw_set(username="user1", password="password1")
+
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
 def create_thermometer(id_suffix):
@@ -109,11 +105,14 @@ def update_thermometer(n):
     with update_lock:
         try:
             url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
-            response = requests.get(url)
+            expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            jwt_token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
+            print(f"Generated JWT token: {jwt_token}")
+            headers = {'Authorization': f'Bearer {jwt_token}'}
+            response = requests.get(url, headers=headers)
             response_json = response.json()
 
             # Publish data to MQTT with JWT token
-            jwt_token = generate_jwt_token()
             payload = {'data': response_json, 'jwt_token': jwt_token}
             mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
         except Exception as e:

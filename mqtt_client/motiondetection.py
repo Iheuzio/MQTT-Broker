@@ -6,8 +6,8 @@ from Crypto.Hash import SHA256
 import base64
 
 # Replace these values with your actual broker information
-broker_address = "your_broker_address"
-broker_port = 1883
+broker_address = "localhost"
+broker_port = 1899
 topic = "your_topic"
 
 # Load the private key for signing
@@ -60,6 +60,8 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 # Connect to the broker
+client.username_pw_set(username="user1", password="password1")
+
 client.connect(broker_address, broker_port, 60)
 
 # Publish the first message with the public key

@@ -1,4 +1,4 @@
-import paho.mqtt.server as mqtt
+import paho.mqtt.client as mqtt
 import jwt
 import time
 
@@ -35,7 +35,7 @@ def on_message(client, userdata, msg):
             print("Invalid token")
 
 # Set up the MQTT broker
-broker = mqtt.MQTTBroker()
+broker = mqtt.Client()
 broker.on_connect = on_connect
 broker.on_publish = on_publish
 broker.on_message = on_message
@@ -44,7 +44,9 @@ broker.on_message = on_message
 broker.authenticate = lambda client, username, password, userdata: True
 
 # Start the MQTT broker on the specified port
-broker.listen("localhost", 1883)
+broker.username_pw_set(username="user1", password="password1")
+
+broker.connect("localhost", 1899)
 
 try:
     # Run the broker loop
