@@ -1,8 +1,7 @@
 import datetime
-import random
-import requests
 import json
 import threading
+import requests
 from dash import Dash, html, dcc, Input, Output, no_update
 import dash_daq as daq
 import paho.mqtt.client as mqtt
@@ -36,8 +35,35 @@ mqtt_client.on_message = on_message
 
 # Connect to the MQTT broker
 mqtt_client.username_pw_set(username="user1", password="password1")
-
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+
+def get_json_motion():
+    try:
+        jwt_token = get_jwt_token()
+        print(f"Generated JWT token: {jwt_token}")
+        headers = {'Authorization': f'Bearer {jwt_token}'}
+        response = requests.get('http://localhost:5081/motiondetection?postal_code=M5S%201A1', headers=headers)
+        
+        # Check the status code of the response
+        if response.status_code != 200:
+            print(f"Error in HTTP request. Status Code: {response.status_code}, Response: {response.text}")
+            return None
+
+        data = response.json()
+        
+        # Publish data to MQTT with JWT token
+        payload = {'data': data, 'jwt_token': jwt_token}
+        mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
+        return data
+    except Exception as e:
+        print(f'Error in get_json_motion: {e}')
+        return "None"
+
+
+def get_jwt_token():
+    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    jwt_token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
+    return jwt_token
 
 def create_thermometer(id_suffix):
     return html.Div([
@@ -58,7 +84,7 @@ def create_thermometer(id_suffix):
             html.Div(id=f'my-thermometer-{id_suffix}-datetime'),
             html.Div(id=f'my-thermometer-{id_suffix}-conditions'),
             html.Div(id=f'my-thermometer-{id_suffix}-intensities')
-        ], style={'display': 'flex', 'flexDirection': 'column'})
+        ], style={'display': 'flex', 'flexDirection': 'column'}),
     ], style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '5%'})
 
 app.layout = html.Div([
@@ -71,12 +97,7 @@ app.layout = html.Div([
         interval=5 * 1000,  # in milliseconds
         n_intervals=0
     ),
-    html.Div([
-        dcc.Location(id='url', refresh=False),
-        html.Div([
-            dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
-        ], style={'marginTop': '5%'})
-    ], style={'marginTop': '5%'})
+    html.Div(id='motion-data')
 ], style={
     'display': 'flex',
     'flexDirection': 'row',
@@ -94,6 +115,8 @@ time = datetime.datetime.now()
         Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
     ] + [
         Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
+    ] + [
+        Output('motion-data', 'children')
     ],
     Input('interval-component', 'n_intervals')
 )
@@ -104,17 +127,20 @@ def update_thermometer(n):
     
     with update_lock:
         try:
+            
             url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
-            expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-            jwt_token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
-            print(f"Generated JWT token: {jwt_token}")
-            headers = {'Authorization': f'Bearer {jwt_token}'}
-            response = requests.get(url, headers=headers)
-            response_json = response.json()
-
-            # Publish data to MQTT with JWT token
-            payload = {'data': response_json, 'jwt_token': jwt_token}
-            mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
+            response_json = requests.get(url).json()
+            motion_data = json.dumps(get_json_motion())
+            # expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            # jwt_token = jwt.encode({'exp': expiration_time}, JWT_SECRET, algorithm='HS256')
+            # print(f"Generated JWT token: {jwt_token}")
+            # headers = {'Authorization': f'Bearer {jwt_token}'}
+            # response = requests.get(url, headers=headers)
+            # response_json = response.json()
+            
+            # # Publish data to MQTT with JWT token
+            # payload = {'data': response_json, 'jwt_token': jwt_token}
+            # mqtt_client.publish(MQTT_TOPIC, json.dumps(payload))
         except Exception as e:
             print(f'Error: {e}')
         
@@ -123,7 +149,8 @@ def update_thermometer(n):
         conditions = [response_json['conditions']]
         intensities = [response_json['intensity']]
         
-        return [value for value in values + dates + conditions + intensities]
+        
+        return [value for value in values + dates + conditions + intensities] + [motion_data]
 
 # MQTT Loop
 mqtt_client.loop_start()

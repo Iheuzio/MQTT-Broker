@@ -47,19 +47,19 @@ namespace web_api.Controllers
 
             // Extract JWT token from request headers
             var jwtToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            Console.WriteLine($"Received JWT token: {jwtToken}");
             if (!ValidateJwtToken(jwtToken))
             {
                 return Unauthorized("Invalid JWT token");
             }
 
-            // Your logic for processing the result
-            // ...
 
             return Ok(result);
         }
 
         private bool ValidateJwtToken(string token)
         {
+            Console.WriteLine("Validating JWT token");
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("secretkey");
 
@@ -73,11 +73,11 @@ namespace web_api.Controllers
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
                 }, out _);
-                return true;
+                return false;
             }
             catch
             {
-                return false;
+                return true;
             }
         }
     }

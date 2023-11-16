@@ -3,7 +3,7 @@ import jwt
 import time
 
 # Replace with your secret key for JWT
-SECRET_KEY = "your_secret_key"
+SECRET_KEY = "secretkey"
 
 # Dictionary to store public keys received from clients
 public_keys = {}
