@@ -29,19 +29,21 @@ source venv/bin/activate
 3. Install the dependencies
 
 ```bash
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 4. Start docker containers
 
 ```bash
-sudo docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build
+sudo docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build -d
+sudo docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps --build -d
+sudo docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
 ```
 
-5. Start the dashboard
+5. Start the Main Application
 
 ```bash
-python3 dashboard.py
+python3 main.py
 ```
 
 ### Windows
@@ -70,11 +72,13 @@ pip install -r requirements.txt
 4. Start docker containers
 
 ```bash
-docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build
+docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build -d
+docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps --build -d
+docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
 ```
 
 5. Start the dashboard
 
 ```bash
-python dashboard.py
+python main.py
 ```
