@@ -4,7 +4,6 @@ Example from: https://elc.github.io/python-security/chapters/06_Symmetric_Encryp
 
 import secrets
 import cryptography
-import pytest
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 

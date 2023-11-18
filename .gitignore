@@ -524,3 +524,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .vscode
+
+*.pem
+

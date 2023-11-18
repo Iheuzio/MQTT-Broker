@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+    mosquitto:
+        image: eclipse-mosquitto:latest
+        container_name: mosquitto_broker
+        ports:
+            - 1883:1883
+            - 9001:9001
+        volumes:
+            - ./mosquitto/config:/mosquitto/config
+            - ./mosquitto/data:/mosquitto/data
+            - ./mosquitto/log:/mosquitto/log
+        networks:
+            - backend
+networks:
+    backend:
+        name: lab_net
+        driver: bridge
