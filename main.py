@@ -3,7 +3,7 @@ import threading
 from encryption_keys import generate_key_pair, load_keys, sign, verify
 from publisher import Publisher
 from subscriber import Subscriber
-from dashboard import dashboard
+from dashboard import Dashboard
 
 exit_event = threading.Event()
 def signal_handler(signum, frame):
@@ -37,7 +37,8 @@ publisher_th.start()
 # launch dashboard in a thread
 
 def run_dashboard():
-    dashboard.run_dashboard()
+    dashboard_instance = Dashboard()
+    dashboard_instance.run_dashboard()
 dashboard_th = threading.Thread(target=run_dashboard)
 dashboard_th.start()
 

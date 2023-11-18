@@ -6,10 +6,12 @@ import threading
 from dash import Dash, html, dcc, Input, Output, no_update
 import dash_daq as daq
 
-def run_dashboard():
-    app = Dash(__name__)
-
-    def create_thermometer(id_suffix):
+class Dashboard:
+    def __init__(self):
+        self.app = None
+        self.setup_layout()
+        
+    def create_thermometer(self, id_suffix):
         return html.Div([
             daq.Thermometer(
                 id=f'my-thermometer-{id_suffix}',
@@ -30,58 +32,58 @@ def run_dashboard():
                 html.Div(id=f'my-thermometer-{id_suffix}-intensities')
             ], style={'display': 'flex', 'flexDirection': 'column'})
         ], style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '5%'})
-
-    app.layout = html.Div([
-        *[
-            create_thermometer(str(i))
-            for i in range(1, 2)
-        ],
-        dcc.Interval(
-            id='interval-component',
-            interval=5 * 1000,  # in milliseconds
-            n_intervals=0
-        ),
-        html.Div([
-            dcc.Location(id='url', refresh=False),
+    
+    def setup_layout(self):
+        self.app = Dash(__name__)
+        self.app.layout = html.Div([
+            *[
+                self.create_thermometer(str(i))
+                for i in range(1, 2)
+            ],
+            dcc.Interval(
+                id='interval-component',
+                interval=5 * 1000,  # in milliseconds
+                n_intervals=0
+            ),
             html.Div([
-                dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
+                dcc.Location(id='url', refresh=False),
+                html.Div([
+                    dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
+                ], style={'marginTop': '5%'}),
             ], style={'marginTop': '5%'})
-        ], style={'marginTop': '5%'})
-    ], style={
-        'display': 'flex',
-        'flexDirection': 'row',
-    })
+        ], style={
+            'display': 'flex',
+            'flexDirection': 'row',
+        })
 
-    update_lock = threading.Lock()
-    time = datetime.datetime.now()
+        time = [datetime.datetime.now()]
 
-    @app.callback(
-        [
-            Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
-        ] + [
-            Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
-        ] + [
-            Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
-        ] + [
-            Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
-        ],
-        Input('interval-component', 'n_intervals')
-    )
-    def update_thermometer(n):
-        
-        # check if 5 seconds have passed
-        global time
-        if (datetime.datetime.now() - time).total_seconds() < 5:
-            return no_update
-        
-        with update_lock:
+        @self.app.callback(
+            [
+                Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
+            ],
+            Input('interval-component', 'n_intervals')
+        )
+        def update_thermometer(n, time=time):
+            # check if 5 seconds have passed
+            if (datetime.datetime.now() - time[0]).total_seconds() < 5:
+                return no_update
+            
+            time[0] = datetime.datetime.now()  # Update the time
+
             try:
                 url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
                 response = requests.get(url)
                 response_json = response.json()
                 # print(response_json)
             except:
-                raise Exception('Could not connect to server')
+                raise Exception('Could not connect to the server')
             
             values = []
             dates = []
@@ -95,5 +97,6 @@ def run_dashboard():
             
             return [value for value in values + dates + conditions + intensities]
 
-    if __name__ == '__main__':
-        app.run(debug=True, host='localhost', threaded=False)
+    def run_dashboard(self):
+        self.app.run_server(debug=False, host='localhost', threaded=False)
+        print("Dashboard running on http://localhost:8050/")
