@@ -28,7 +28,7 @@ def get_weather_forecast(postalCode):
         "PostalCode": postalCode
     })
 
-@app.route('/motiondetection')
+@app.route('/motiondetection', methods=['GET'])
 def motion_detection():
     postal_code = request.args.get('postal_code')
     if not postal_code:
@@ -37,7 +37,7 @@ def motion_detection():
         return jsonify({'error': 'Invalid postal code'}), 400
     detection_type = 'motion' if random.randint(0, 1) == 0 else 'collision'
     detection_value = random.choice([True, False])
-    date_time = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    date_time = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
     result = {
         'postal_code': postal_code,
         'detection': {'type': detection_type, 'value': detection_value},

@@ -48,7 +48,7 @@ class Dashboard:
             html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div([
-                    dcc.Link('Motion Detection', href='http://localhost:5081/motiondetection?postal_code=M5S%201A1')
+                    dcc.Link('Motion Detection', href='http://localhost:5000/motiondetection?postal_code=M5S1A1')
                 ], style={'marginTop': '5%'}),
             ], style={'marginTop': '5%'})
         ], style={
@@ -78,7 +78,7 @@ class Dashboard:
             time[0] = datetime.datetime.now()  # Update the time
 
             try:
-                url = "http://localhost:5080/weather-forecast/postal-code/M5S%201A1"
+                url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
                 response = requests.get(url)
                 response_json = response.json()
                 # print(response_json)
