@@ -1,5 +1,15 @@
+import threading
 import paho.mqtt.client as mqtt
 import time
+import json
+import jwt
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import padding, utils, rsa
+from datetime import datetime
+from cryptography.hazmat.primitives import hashes
+from jwt import encode, decode
+
 
 class Subscriber:
     def __init__(self):
@@ -14,23 +24,89 @@ class Subscriber:
 
     def __on_connect(self, client, userdata, flags, return_code):
         if return_code == 0:
-            print("subsciber connected")
+            print("Subscriber connected")
+            client.subscribe("jwt-token")
             client.subscribe("public-keys/*")
+            client.subscribe("event/Client1")
         else:
-            print("could not connect, return code:", return_code)
+            print("Could not connect, return code:", return_code)
 
     def __on_message(self, client, userdata, message):
-        # if the message is other client's public key, save it to .pem file
-        # if it's collision event, update the dashboard
-        print("Received message: " ,str(message.payload.decode("utf-8")))
+        payload = message.payload.decode("utf-8")
+
+        if message.topic == "jwt-token":
+            if not self.__validate_jwt_token(payload):
+                print("JWT token is expired or invalid")
+
+        elif "public_key" in payload:
+            if not self.__verify_signature(payload):
+                print("Digital signature verification failed")
+                return
+            
+            # Extract and process the public key
+            public_key_data = json.loads(payload)
+            print("Received public key:", public_key_data["public_key"])
+
+        elif "message" in payload and "signature" in payload:
+            if not self.__verify_signature(payload):
+                print("Digital signature verification failed")
+                return
+
+            # Extract and process the message
+            message_data = json.loads(payload)
+            print("Received message:", message_data["message"])
+
+    def __validate_jwt_token(self, token):
+        try:
+            decoded_token = decode(token, "your_secret_key", algorithms=["HS256"])
+            return decoded_token["exp"] > datetime.utcnow()
+        except jwt.ExpiredSignatureError:
+            return False
+        except jwt.InvalidTokenError:
+            return False
+
+    def __verify_signature(self, payload):
+        try:
+            signature = json.loads(payload)["signature"]
+            message = json.loads(payload)["message"].encode("utf-8")
+
+            # Replace with your actual public key
+            public_key_bytes = b"keys/public.pem"
+
+            public_key = serialization.load_pem_public_key(
+                public_key_bytes,
+                backend=default_backend()
+            )
+
+            
+            public_key.verify(
+                signature,
+                message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                utils.Prehashed(hashes.SHA256())
+            )
+
+            return True
+        except Exception as e:
+            print("Signature verification error:", e)
+            return False
 
     def loop(self, exit_event):
         self.__client.loop_start()
         if exit_event.is_set():
-                self.__client.loop_stop()
+            self.__client.loop_stop()
         try:
-            
-            time.sleep(10)
+            while not exit_event.is_set():
+                time.sleep(1)
         finally:
             self.__client.loop_stop()
 
+if __name__ == "__main__":
+    # Instantiate Subscriber
+    subscriber = Subscriber()
+    
+    # Start the subscriber loop
+    subscriber.loop(exit_event=threading.Event())

@@ -2,14 +2,38 @@ import random
 from flask import Flask, request, jsonify
 from random import choice
 from datetime import datetime
+import jwt
+from functools import wraps
+from jwt import encode, decode
 
 app = Flask(__name__)
+
+SECRET_KEY = "secret_key"
 
 _conditions = ["Snowfall", "Rain", "Sunny", "Cloudy"]
 _intensities = ["heavy", "medium", "light", "n/a"]
 _postalCodes = ["M9A1A8", "M5S1A1", "M4W1A5", "M6G1A1", "M5R1A6"]
 
+def authorize_jwt_token(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Token is missing"}), 401
+
+        try:
+            decoded_token = decode(token, SECRET_KEY, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
 @app.route('/weather-forecast/postal-code/<postalCode>', methods=['GET'])
+@authorize_jwt_token
 def get_weather_forecast(postalCode):
     if postalCode not in _postalCodes:
         return jsonify("Unknown Postal Code"), 400
@@ -29,6 +53,7 @@ def get_weather_forecast(postalCode):
     })
 
 @app.route('/motiondetection', methods=['GET'])
+@authorize_jwt_token
 def motion_detection():
     postal_code = request.args.get('postal_code')
     if not postal_code:
