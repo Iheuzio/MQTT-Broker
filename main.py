@@ -34,13 +34,7 @@ publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message
 publisher_th.start()
 
 
-# launch dashboard in a thread
 
-def run_dashboard():
-    dashboard_instance = Dashboard()
-    dashboard_instance.run_dashboard()
-dashboard_th = threading.Thread(target=run_dashboard)
-dashboard_th.start()
 
 # launch subsciber in a thread, update dashboard on message
 
@@ -49,6 +43,14 @@ dashboard_th.start()
 subscriber = Subscriber()
 subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
 subscriber_th.start()
+
+# launch dashboard in a thread
+
+def run_dashboard():
+    dashboard_instance = Dashboard(subscriber)
+    dashboard_instance.run_dashboard()
+dashboard_th = threading.Thread(target=run_dashboard)
+dashboard_th.start()
 
 # test msg
 message = "testing2"

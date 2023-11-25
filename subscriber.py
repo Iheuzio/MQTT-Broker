@@ -6,7 +6,7 @@ import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding, utils, rsa
-from datetime import datetime
+from datetime import datetime, timedelta
 from cryptography.hazmat.primitives import hashes
 from jwt import encode, decode
 
@@ -103,7 +103,7 @@ class Subscriber:
                 time.sleep(1)
         finally:
             self.__client.loop_stop()
-
+    
 if __name__ == "__main__":
     # Instantiate Subscriber
     subscriber = Subscriber()
