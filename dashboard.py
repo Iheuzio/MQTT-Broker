@@ -59,17 +59,17 @@ class Dashboard:
         })
 
         @self.app.callback(
-                [
-                    Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
-                ] + [
-                    Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
-                ] + [
-                    Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
-                ] + [
-                    Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
-                ],
-                Input('interval-component', 'n_intervals')
-            )
+            [
+                Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-datetime', 'children') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
+            ] + [
+                Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
+            ],
+            Input('interval-component', 'n_intervals')
+        )
         def update_thermometer(n):
             # check if 5 seconds have passed
             if (datetime.datetime.now() - self.time).total_seconds() < 5:
@@ -87,7 +87,7 @@ class Dashboard:
                 url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
                 response = requests.get(url, headers=headers)
                 response_json = response.json()
-                # print(response_json)
+                print(response_json)
             except Exception as e:
                 raise Exception(f'Could not connect to the server: {str(e)}')
 
@@ -96,12 +96,18 @@ class Dashboard:
             conditions = []
             intensities = []
 
-            values.append(response_json['TemperatureC'])  # Use 'TemperatureC' here
-            dates.append(response_json['Datetime'])  # Use 'Datetime' here
-            conditions.append(response_json['Conditions'])  # Use 'Conditions' here
-            intensities.append(response_json['Intensity'])  # Use 'Intensity' here
+            try:
+                values.append(response_json['TemperatureC'])  # Use 'TemperatureC' here
+                dates.append(response_json['Datetime'])  # Use 'Datetime' here
+                conditions.append(response_json['Conditions'])  # Use 'Conditions' here
+                intensities.append(response_json['Intensity'])  # Use 'Intensity' here
+            except KeyError as e:
+                # Handle the case where the key is not present in the response_json
+                print(f"KeyError: {str(e)}")
+                return no_update
 
             return [value for value in values + dates + conditions + intensities]
+
 
     def run_dashboard(self):
         self.app.run_server(debug=False, host='localhost', threaded=False)

@@ -8,7 +8,7 @@ from jwt import encode, decode
 
 app = Flask(__name__)
 
-SECRET_KEY = "secret_key"
+SECRET_KEY = "your_secret_key"
 
 _conditions = ["Snowfall", "Rain", "Sunny", "Cloudy"]
 _intensities = ["heavy", "medium", "light", "n/a"]
@@ -18,11 +18,13 @@ def authorize_jwt_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get("Authorization")
+        print("Received token:", token)
         if not token:
             return jsonify({"error": "Token is missing"}), 401
 
         try:
             decoded_token = decode(token, SECRET_KEY, algorithms=["HS256"])
+            print("Decoded token:", decoded_token)
         except jwt.ExpiredSignatureError:
             return jsonify({"error": "Token has expired"}), 401
         except jwt.InvalidTokenError:
@@ -31,6 +33,7 @@ def authorize_jwt_token(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
 
 @app.route('/weather-forecast/postal-code/<postalCode>', methods=['GET'])
 @authorize_jwt_token
