@@ -90,12 +90,13 @@ class Dashboard:
             conditions = []
             intensities = []
 
-            values.append(response_json['temperatureC'])
-            dates.append(response_json['datetime'])
-            conditions.append(response_json['conditions'])
-            intensities.append(response_json['intensity'])
+            values.append(response_json['TemperatureC'])  # Use 'TemperatureC' here
+            dates.append(response_json['Datetime'])  # Use 'Datetime' here
+            conditions.append(response_json['Conditions'])  # Use 'Conditions' here
+            intensities.append(response_json['Intensity'])  # Use 'Intensity' here
             
             return [value for value in values + dates + conditions + intensities]
+
 
     def run_dashboard(self):
         self.app.run_server(debug=False, host='localhost', threaded=False)
