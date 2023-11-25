@@ -11,6 +11,7 @@ class Dashboard:
         self.app = None
         self.setup_layout()
         self.subscriber = Subscriber
+        self.time = datetime.datetime.now()
         
     def create_thermometer(self, id_suffix):
         return html.Div([
@@ -57,7 +58,6 @@ class Dashboard:
             'flexDirection': 'row',
         })
 
-        time = [datetime.datetime.now()]
         @self.app.callback(
                 [
                     Output(f'my-thermometer-{i}', 'value') for i in range(1, 2)
@@ -70,12 +70,12 @@ class Dashboard:
                 ],
                 Input('interval-component', 'n_intervals')
             )
-        def update_thermometer(n, time=time):
+        def update_thermometer(n):
             # check if 5 seconds have passed
-            if (datetime.datetime.now() - time[0]).total_seconds() < 5:
+            if (datetime.datetime.now() - self.time).total_seconds() < 5:
                 return no_update
 
-            time[0] = datetime.datetime.now()  # Update the time
+            self.time = datetime.datetime.now()  # Update the time
 
             try:
                 # Get the JWT token from the subscriber instance
