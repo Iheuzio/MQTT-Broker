@@ -1,5 +1,6 @@
 import signal
 import threading
+import time
 from encryption_keys import generate_key_pair, load_keys, sign, verify
 from publisher import Publisher
 from subscriber import Subscriber
@@ -27,6 +28,12 @@ private_key, public_key = load_keys(password)
 # test msg
 message = "testing"
 
+# launch subsciber in a thread, update dashboard on message
+
+subscriber = Subscriber()
+subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
+subscriber_th.start()
+
 # launch publisher in a thread
 publisher = Publisher(private_key, public_key)
 publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message])
@@ -35,13 +42,7 @@ publisher_th.start()
 
 # launch dashboard in a thread
 
-# launch subsciber in a thread, update dashboard on message
 
-
-
-subscriber = Subscriber()
-subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
-subscriber_th.start()
 
 # test msg
 message = "testing2"

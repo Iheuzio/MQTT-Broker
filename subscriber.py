@@ -15,7 +15,8 @@ class Subscriber:
     def __on_connect(self, client, userdata, flags, return_code):
         if return_code == 0:
             print("subsciber connected")
-            client.subscribe("public-keys/*")
+            client.subscribe("public-keys/#")
+            client.subscribe("event/#")
         else:
             print("could not connect, return code:", return_code)
 
@@ -32,5 +33,6 @@ class Subscriber:
             
             time.sleep(10)
         finally:
+            print("finally subscriber")
             self.__client.loop_stop()
 

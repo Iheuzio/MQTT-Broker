@@ -43,6 +43,7 @@ class Publisher:
             else:
                 print("Failed to send message to topic " + topic)
         finally:
+            print("finally publisher")
             self.__client.loop_stop()
 
 
