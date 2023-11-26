@@ -42,5 +42,5 @@ class Camera:
         print ("File Saved in :  %s" % filename)
 
         # publish
-        publisher.publish_event("testing new evt")
+        publisher.publish_traffic_violation(filename)
 

@@ -39,7 +39,7 @@ subscriber_th.start()
 
 # launch publisher in a thread
 publisher = Publisher(private_key, public_key)
-publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message])
+publisher_th = threading.Thread(target=publisher.loop, args=[exit_event])
 publisher_th.start()
 
 # launch dashboard in a thread
@@ -64,10 +64,17 @@ def loop():
     light_th.start()
     while not exit_event.is_set():
         # GET from APIs here
-        if light.is_red(): # and movement (from API)
+        is_collision = True
+        is_movement = False
+        timestamp = "time from api"
+        weather = "weather from api"
+        if light.is_red() and is_movement: # and movement (from API)
             print("redlight + movement")
             # camera thread will handle taking video, saving to file and publishing
             camera_th = threading.Thread(target=camera.take_picture, args=[publisher])
             camera_th.start()
             time.sleep(3)
+        elif is_collision:
+            publisher.publish_collision(timestamp, weather)
+        time.sleep(1)
 loop()

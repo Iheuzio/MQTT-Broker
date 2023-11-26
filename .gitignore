@@ -530,3 +530,5 @@ FodyWeavers.xsd
 mqtt_lab/mosquitto/data/*
 
 video/*
+
+mosquitto.db

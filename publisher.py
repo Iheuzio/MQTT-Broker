@@ -14,6 +14,8 @@ class Publisher:
         self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
+        self.__message = None
+        self.__topic = "event/Client1"
         self.__public_key = public_key
         self.__client = mqtt.Client(client_id="Client1", userdata=None)
         self.__client.on_connect = self.__on_connect
@@ -47,21 +49,24 @@ class Publisher:
         token = encode(payload, "your_secret_key", algorithm="HS256")
         return token
 
-    def loop(self, exit_event, message):
+    def loop(self, exit_event):
         public_key_sent = False
         self.__client.loop_start()
         if exit_event.is_set():
             self.__client.loop_stop()
-        payload = message
+        payload = None
 
         try:
             while not exit_event.is_set():
-                time.sleep(2)
                 if not public_key_sent:
                     topic = "public-keys/Client1"
                     payload = str(self.__public_key)
+                elif not self.__message:
+                    continue
                 else:
-                    topic = "event/Client1"
+                    payload = json.dumps(self.__message)
+                    # SIGN payload here
+                    topic = self.__topic
                 result = self.__client.publish(topic=topic, payload=payload)
                 status = result[0]
                 if status == 0:
@@ -69,12 +74,30 @@ class Publisher:
                     public_key_sent = True
                 else:
                     print("Failed to send message to topic " + topic)
+                self.__message = None
         finally:
             print("finally publisher")
             self.__client.loop_stop()
 
-    def publish_event(self, msg):
-        print(f"publishing {msg}")
+    def publish_traffic_violation(self, timestamp, filename):
+        self.__topic = "event/Client1/traffic-violation"
+        obj = {
+            "type": "Traffic Violation",
+            "timestamp": timestamp,
+            "filename": filename
+        }
+        self.__message = obj
+        print(f"publishing {self.__message}")
+
+    def publish_collision(self, timestamp, weather):
+        self.__topic = "event/Client1/collision"
+        obj = {
+            "type": "Collision",
+            "timestamp": timestamp,
+            "weather": weather
+        }
+        self.__message = obj
+        print(f"publishing collision {self.__message}")
 
 if __name__ == "__main__":
     # Replace with your actual private and public keys
