@@ -6,6 +6,7 @@ from datetime import datetime
 import jwt
 from functools import wraps
 from jwt import encode, decode
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -14,6 +15,7 @@ SECRET_KEY = "your_secret_key"
 _conditions = ["Snowfall", "Rain", "Sunny", "Cloudy"]
 _intensities = ["heavy", "medium", "light", "n/a"]
 _postalCodes = ["M9A1A8", "M5S1A1", "M4W1A5", "M6G1A1", "M5R1A6"]
+
 
 def authorize_jwt_token(f):
     @wraps(f)
@@ -28,6 +30,9 @@ def authorize_jwt_token(f):
             token = token[7:]
             # Decode the token
             payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            # Check if the token has expired
+            if 'exp' in payload and datetime.now().timestamp() > payload['exp']:
+                return jsonify({"error": "Token has expired"}), 401
         except jwt.InvalidTokenError as e:
             return jsonify({"error": "Invalid token", "exception": str(e)}), 401
 
