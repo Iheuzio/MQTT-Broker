@@ -30,7 +30,7 @@ message = "testing"
 
 # launch publisher in a thread
 publisher = Publisher(private_key, public_key, subscriber)
-publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message])
+publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message, "event/Client1"])
 publisher_th.start()
 
 # launch subscriber in a thread, update dashboard on message
