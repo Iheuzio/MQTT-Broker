@@ -1,0 +1,6 @@
+A car passed in red at 2023-11-25-23.03.59; check the record of the traffic offense in ./video/2023-11-25-23.03.59.h264
+A car passed in red at 2023-11-25-23.04.14; check the record of the traffic offense in ./video/2023-11-25-23.04.14.h264
+A car passed in red at 2023-11-25-23.04.29; check the record of the traffic offense in ./video/2023-11-25-23.04.29.h264
+A car passed in red at 2023-11-25-23.22.12; check the record of the traffic offense in ./video/2023-11-25-23.22.12.h264
+A car passed in red at 2023-11-25-23.22.27; check the record of the traffic offense in ./video/2023-11-25-23.22.27.h264
+A car passed in red at 2023-11-25-23.22.42; check the record of the traffic offense in ./video/2023-11-25-23.22.42.h264

@@ -16,6 +16,8 @@ class Publisher:
         self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
+        self.__message = None
+        self.__topic = "event/Client1"
         self.__public_key = public_key
         self.__subscriber = subscriber
         self.__client = mqtt.Client(client_id="Client1", userdata=None)
@@ -88,7 +90,28 @@ class Publisher:
             self.publish_message("motion-detection", self.sign_payload(motion_detection_payload))
 
         finally:
+            print("finally publisher")
             self.__client.loop_stop()
+
+    def publish_traffic_violation(self, timestamp, filename):
+        self.__topic = "event/Client1/traffic-violation"
+        obj = {
+            "type": "Traffic Violation",
+            "timestamp": timestamp,
+            "filename": filename
+        }
+        self.__message = obj
+        print(f"publishing {self.__message}")
+
+    def publish_collision(self, timestamp, weather):
+        self.__topic = "event/Client1/collision"
+        obj = {
+            "type": "Collision",
+            "timestamp": timestamp,
+            "weather": weather
+        }
+        self.__message = obj
+        print(f"publishing collision {self.__message}")
 
     def sign_payload(self, payload):
         # Replace with your actual private key

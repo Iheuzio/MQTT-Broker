@@ -29,7 +29,9 @@ class Subscriber:
 
     def __on_connect(self, client, userdata, flags, return_code):
         if return_code == 0:
-            print("Subscriber connected")
+            print("subsciber connected")
+            client.subscribe("public-keys/#")
+            client.subscribe("event/#")
             client.subscribe("jwt-token")
             client.subscribe("weather-forecast")
             client.subscribe("motion-detection")
@@ -118,6 +120,7 @@ class Subscriber:
 
                 time.sleep(1)
         finally:
+            print("finally subscriber")
             self.__client.loop_stop()
 
     def get_jwt_token(self):

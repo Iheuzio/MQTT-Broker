@@ -1,15 +1,20 @@
 import signal
 import threading
+import time
 from encryption_keys import generate_key_pair, load_keys, sign, verify
 from publisher import Publisher
 from subscriber import Subscriber
 from dashboard import Dashboard
+from Light import Light
+from Camera import Camera
+
+global light, camera
+light = Light()
+camera = Camera()
 
 exit_event = threading.Event()
-
 def signal_handler(signum, frame):
     exit_event.set()
-
 signal.signal(signal.SIGINT, signal_handler)
 
 password = b"password123"
@@ -22,35 +27,54 @@ private_key, public_key = load_keys(password)
 # signature = sign(message, private_key)
 # print(verify(signature, message, public_key))
 
-# Instantiate Subscriber
-subscriber = Subscriber()
 
 # test msg
 message = "testing"
 
-# launch publisher in a thread
-publisher = Publisher(private_key, public_key, subscriber)
-publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message, "event/Client1"])
-publisher_th.start()
+# launch subsciber in a thread, update dashboard on message
 
-# launch subscriber in a thread, update dashboard on message
+subscriber = Subscriber()
 subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
 subscriber_th.start()
 
-# test msg
-message = "testing2"
+# launch publisher in a thread
+publisher = Publisher(private_key, public_key)
+publisher_th = threading.Thread(target=publisher.loop, args=[exit_event])
+publisher_th.start()
+
+# launch dashboard in a thread
 
 def run_dashboard():
     dashboard_instance = Dashboard(subscriber)
     dashboard_instance.run_dashboard()
-
 dashboard_th = threading.Thread(target=run_dashboard)
 dashboard_th.start()
 
+# test msg
+message = "testing2"
+
 # loop with traffic light, constantly checking the api's
 # if conditions are met, trigger publish
-# before publish, take a picture and include the path in the payload
+# before publish, take picture and include path in the payload
 
-while not exit_event.is_set():
-    # check APIs here
-    pass
+## The loop method creates the threads for the light and camera.
+## loop then checks for the conditions needed before starting each thread.
+def loop():
+    light_th = threading.Thread(target=light.loop, args=[exit_event])
+    light_th.start()
+    while not exit_event.is_set():
+        # GET from APIs here
+        is_collision = True
+        is_movement = False
+        timestamp = "time from api"
+        weather = "weather from api"
+        if light.is_red() and is_movement: # and movement (from API)
+            print("redlight + movement")
+            # camera thread will handle taking video, saving to file and publishing
+            camera_th = threading.Thread(target=camera.take_picture, args=[publisher])
+            camera_th.start()
+            time.sleep(3)
+        elif is_collision:
+            publisher.publish_collision(timestamp, weather)
+        time.sleep(1)
+loop()
