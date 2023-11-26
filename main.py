@@ -26,21 +26,19 @@ private_key, public_key = load_keys(password)
 # message = b"hello wrld"
 # signature = sign(message, private_key)
 # print(verify(signature, message, public_key))
-
+subscriber = Subscriber()
 
 # test msg
 message = "testing"
 
-# launch subsciber in a thread, update dashboard on message
+# launch publisher in a thread
+publisher = Publisher(private_key, public_key, subscriber)
+publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message, "event/Client1"])
+publisher_th.start()
 
-subscriber = Subscriber()
+# launch subsciber in a thread, update dashboard on message
 subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
 subscriber_th.start()
-
-# launch publisher in a thread
-publisher = Publisher(private_key, public_key)
-publisher_th = threading.Thread(target=publisher.loop, args=[exit_event])
-publisher_th.start()
 
 # launch dashboard in a thread
 
