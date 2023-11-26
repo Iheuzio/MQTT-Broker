@@ -1,3 +1,4 @@
+import base64
 import threading
 import paho.mqtt.client as mqtt
 import time
@@ -85,13 +86,13 @@ class Subscriber:
             message = json.loads(payload)["message"].encode("utf-8")
 
             public_key.verify(
-                signature,
+                base64.b64decode(signature),
                 message,
                 padding.PSS(
                     mgf=padding.MGF1(hashes.SHA256()),
                     salt_length=padding.PSS.MAX_LENGTH
                 ),
-                utils.Prehashed(hashes.SHA256())
+                hashes.SHA256()
             )
 
             return True

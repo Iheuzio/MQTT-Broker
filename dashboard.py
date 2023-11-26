@@ -84,6 +84,12 @@ class Dashboard:
             except Exception as e:
                 raise Exception(f'Could not connect to the server: {str(e)}')
 
+            try:
+                # Parse the 'message' into a dictionary
+                response_json = json.loads(response_json['message'])
+                response_motion_json = json.loads(response_motion_json['message'])
+            except json.JSONDecodeError:
+                raise Exception('Invalid JSON format')
             values = []
             dates = []
             conditions = []
