@@ -1,3 +1,4 @@
+import json
 import random
 from flask import Flask, request, jsonify
 from random import choice
@@ -18,22 +19,21 @@ def authorize_jwt_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get("Authorization")
-        print("Received token:", token)
+        print("Received token:", token)  # Added for troubleshooting
         if not token:
             return jsonify({"error": "Token is missing"}), 401
 
         try:
-            decoded_token = decode(token, SECRET_KEY, algorithms=["HS256"])
-            print("Decoded token:", decoded_token)
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token has expired"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid token"}), 401
+            # Remove 'Bearer ' from the token
+            token = token[7:]
+            # Decode the token
+            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        except jwt.InvalidTokenError as e:
+            return jsonify({"error": "Invalid token", "exception": str(e)}), 401
 
         return f(*args, **kwargs)
 
     return decorated_function
-
 
 @app.route('/weather-forecast/postal-code/<postalCode>', methods=['GET'])
 @authorize_jwt_token
@@ -74,4 +74,4 @@ def motion_detection():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
