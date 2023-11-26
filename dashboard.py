@@ -76,19 +76,10 @@ class Dashboard:
             self.time = datetime.datetime.now()  # Update the time
 
             try:
-## Get the JWT token from the subscriber instance
-                ## Get the JWT token from the subscriber instance
-                jwt_token = self.subscriber.get_jwt_token()
-                jwt_token_str = jwt_token.decode("utf-8")
-                headers = {'Authorization': 'Bearer ' + jwt_token_str}
-                url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
-                response = requests.get(url, headers=headers)
-                response_json = response.json()
+                # Retrieve data from the Subscriber
+                response_json = self.subscriber.get_weather_forecast_message()
                 print(response_json)
-                
-                url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
-                response_motion = requests.get(url_motion, headers=headers)
-                response_motion_json = response_motion.json()
+                response_motion_json = self.subscriber.get_motion_detection_message()
                 print(response_motion_json)
             except Exception as e:
                 raise Exception(f'Could not connect to the server: {str(e)}')
