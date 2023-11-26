@@ -35,7 +35,6 @@ python3 -m pip install -r requirements.txt
 4. Start docker containers
 
 ```bash
-sudo docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build -d
 sudo docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps --build -d
 sudo docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
 ```
@@ -72,7 +71,6 @@ pip install -r requirements.txt
 4. Start docker containers
 
 ```bash
-docker compose -f web_api/docker-compose.yml up --force-recreate --no-deps --build -d
 docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps --build -d
 docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
 ```
