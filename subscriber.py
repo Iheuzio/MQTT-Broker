@@ -72,8 +72,9 @@ class Subscriber:
 
     def __verify_signature(self, payload):
         try:
-            # Replace with your actual public key
-            public_key_bytes = b"keys/public.pem"
+            # Load the public key content from the file
+            with open("keys/public.pem", "rb") as key_file:
+                public_key_bytes = key_file.read()
 
             public_key = serialization.load_pem_public_key(
                 public_key_bytes,

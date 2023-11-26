@@ -26,7 +26,7 @@ class Publisher:
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
         response = requests.get(url, headers=headers)
-        return response.json()
+        self.weather_forecast_data = response.json()
 
     def fetch_motion_detection(self):
         jwt_token = self.__subscriber.get_jwt_token()
@@ -34,7 +34,7 @@ class Publisher:
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
         response_motion = requests.get(url_motion, headers=headers)
-        return response_motion.json()
+        self.motion_detection_data = response_motion.json()
     
     def __on_connect(self, client, userdata, flags, return_code):
         print("CONNACK received with code %s." % return_code)
@@ -69,7 +69,12 @@ class Publisher:
                 payload = str(self.__public_key)
             else:
                 topic = "event/Client1"
-
+            try:
+                
+                self.fetch_motion_detection()
+                self.fetch_weather_forecast()
+            except Exception as e:
+                print(f'Could not connect to the server: {str(e)}')
             # Publish weather forecast data
             weather_forecast_payload = json.dumps(self.weather_forecast_data)
             self.publish_message("weather-forecast", weather_forecast_payload)
