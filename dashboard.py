@@ -101,7 +101,7 @@ class Dashboard:
                 dates.append(response_json['Datetime'])  # Use 'Datetime' here
                 conditions.append(response_json['Conditions'])  # Use 'Conditions' here
                 intensities.append(response_json['Intensity'])  # Use 'Intensity' here
-                motiondetection.append(response_motion_json['motion_detected'])
+                motiondetection.append(response_motion_json)
             except KeyError as e:
                 # Handle the case where the key is not present in the response_json
                 print(f"KeyError: {str(e)}")
