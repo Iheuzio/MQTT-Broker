@@ -527,4 +527,4 @@ FodyWeavers.xsd
 
 *.pem
 
-mqtt_lab/mosquitto/data/mosquitto.db
+mqtt_lab/mosquitto/data/*
