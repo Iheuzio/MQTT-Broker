@@ -4,6 +4,7 @@ import time
 from encryption_keys import generate_key_pair, load_keys, sign, verify
 from publisher import Publisher
 from subscriber import Subscriber
+from dashboard import Dashboard
 
 exit_event = threading.Event()
 def signal_handler(signum, frame):
@@ -39,10 +40,13 @@ publisher = Publisher(private_key, public_key)
 publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message])
 publisher_th.start()
 
-
 # launch dashboard in a thread
 
-
+def run_dashboard():
+    dashboard_instance = Dashboard(subscriber)
+    dashboard_instance.run_dashboard()
+dashboard_th = threading.Thread(target=run_dashboard)
+dashboard_th.start()
 
 # test msg
 message = "testing2"

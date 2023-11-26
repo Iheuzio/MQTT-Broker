@@ -5,7 +5,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.exceptions import InvalidSignature
 
-
 def generate_key_pair(password):
     key_size = 2048  # Should be at least 2048
     private_key = rsa.generate_private_key(
