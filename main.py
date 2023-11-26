@@ -6,8 +6,10 @@ from subscriber import Subscriber
 from dashboard import Dashboard
 
 exit_event = threading.Event()
+
 def signal_handler(signum, frame):
     exit_event.set()
+
 signal.signal(signal.SIGINT, signal_handler)
 
 password = b"password123"
@@ -20,45 +22,35 @@ private_key, public_key = load_keys(password)
 # signature = sign(message, private_key)
 # print(verify(signature, message, public_key))
 
-# code for traffic light
-
-
-# code for camera
+# Instantiate Subscriber
+subscriber = Subscriber()
 
 # test msg
 message = "testing"
 
 # launch publisher in a thread
-publisher = Publisher(private_key, public_key)
+publisher = Publisher(private_key, public_key, subscriber)
 publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message])
 publisher_th.start()
 
-
-
-
-# launch subsciber in a thread, update dashboard on message
-
-
-
-subscriber = Subscriber()
+# launch subscriber in a thread, update dashboard on message
 subscriber_th = threading.Thread(target=subscriber.loop, args=[exit_event])
 subscriber_th.start()
-
-# launch dashboard in a thread
-
-def run_dashboard():
-    dashboard_instance = Dashboard(subscriber)
-    dashboard_instance.run_dashboard()
-dashboard_th = threading.Thread(target=run_dashboard)
-dashboard_th.start()
 
 # test msg
 message = "testing2"
 
+def run_dashboard():
+    dashboard_instance = Dashboard(subscriber)
+    dashboard_instance.run_dashboard()
+
+dashboard_th = threading.Thread(target=run_dashboard)
+dashboard_th.start()
+
 # loop with traffic light, constantly checking the api's
 # if conditions are met, trigger publish
-# before publish, take picture and include path in the payload
+# before publish, take a picture and include the path in the payload
 
 while not exit_event.is_set():
-    # check apis here
+    # check APIs here
     pass

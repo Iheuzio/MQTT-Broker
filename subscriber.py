@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from cryptography.hazmat.primitives import hashes
 from jwt import encode, decode
 
-
 class Subscriber:
     def __init__(self):
         self.__broker_hostname = "localhost"
@@ -18,9 +17,9 @@ class Subscriber:
         self.__client = mqtt.Client(client_id="Client2", userdata=None)
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
-        # change with your user and password auth
         self.__client.username_pw_set(username="user_name2", password="password2")
         self.__client.connect(self.__broker_hostname, self.__port, 60)
+        self.__jwt_token = None
 
     def __on_connect(self, client, userdata, flags, return_code):
         if return_code == 0:
@@ -37,6 +36,9 @@ class Subscriber:
         if message.topic == "jwt-token":
             if not self.__validate_jwt_token(payload):
                 print("JWT token is expired or invalid")
+            else:
+                print("JWT token is valid")
+                self.__jwt_token = payload
 
         elif "public_key" in payload:
             if not self.__verify_signature(payload):
@@ -58,7 +60,7 @@ class Subscriber:
 
     def __validate_jwt_token(self, token):
         try:
-            decoded_token = decode(token, "your_secret_key", algorithms=["HS256"])
+            decoded_token = decode(token, verify=False)
             return decoded_token["exp"] > datetime.utcnow()
         except jwt.ExpiredSignatureError:
             return False
@@ -103,9 +105,13 @@ class Subscriber:
                 time.sleep(1)
         finally:
             self.__client.loop_stop()
-            
+
     def get_jwt_token(self):
-        return self.__generate_jwt_token().encode("utf-8")
+        # if it is None then generate one
+        if self.__jwt_token is None:
+            self.__jwt_token  = self.__generate_jwt_token()
+            self.__jwt_token = self.__jwt_token.encode("utf-8")
+        return self.__jwt_token
     
     def __generate_jwt_token(self):
         # Generate JWT token with expiration time
@@ -116,10 +122,4 @@ class Subscriber:
         }
         token = encode(payload, "your_secret_key", algorithm="HS256")
         return token
-    
-if __name__ == "__main__":
-    # Instantiate Subscriber
-    subscriber = Subscriber()
-    
-    # Start the subscriber loop
-    subscriber.loop(exit_event=threading.Event())
+
