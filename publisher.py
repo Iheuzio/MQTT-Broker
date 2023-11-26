@@ -45,7 +45,7 @@ class Publisher:
             "iat": datetime.utcnow(),
         }
         token = encode(payload, "your_secret_key", algorithm="HS256")
-        return decode(token, "your_secret_key", algorithms=["HS256"])
+        return token
 
     def loop(self, exit_event, message):
         public_key_sent = False
@@ -55,21 +55,26 @@ class Publisher:
         payload = message
 
         try:
-            if not public_key_sent:
-                topic = "public-keys/Client1"
-                payload = str(self.__public_key)
-            else:
-                topic = "event/Client1"
-            result = self.__client.publish(topic=topic, payload=payload)
-            status = result[0]
-            if status == 0:
-                print("Message "+ str(payload) + " is published to topic " + topic)
-                public_key_sent = True
-            else:
-                print("Failed to send message to topic " + topic)
+            while not exit_event.is_set():
+                time.sleep(2)
+                if not public_key_sent:
+                    topic = "public-keys/Client1"
+                    payload = str(self.__public_key)
+                else:
+                    topic = "event/Client1"
+                result = self.__client.publish(topic=topic, payload=payload)
+                status = result[0]
+                if status == 0:
+                    print("Message "+ str(payload) + " is published to topic " + topic)
+                    public_key_sent = True
+                else:
+                    print("Failed to send message to topic " + topic)
         finally:
             print("finally publisher")
             self.__client.loop_stop()
+
+    def publish_event(self, msg):
+        print(f"publishing {msg}")
 
 if __name__ == "__main__":
     # Replace with your actual private and public keys

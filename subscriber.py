@@ -37,7 +37,6 @@ class Subscriber:
         if message.topic == "jwt-token":
             if not self.__validate_jwt_token(payload):
                 print("JWT token is expired or invalid")
-
         elif "public_key" in payload:
             if not self.__verify_signature(payload):
                 print("Digital signature verification failed")
@@ -59,7 +58,8 @@ class Subscriber:
     def __validate_jwt_token(self, token):
         try:
             decoded_token = decode(token, "your_secret_key", algorithms=["HS256"])
-            return decoded_token["exp"] > datetime.utcnow()
+            exp_datetime = datetime.utcfromtimestamp(decoded_token["exp"])
+            return exp_datetime > datetime.utcnow()
         except jwt.ExpiredSignatureError:
             return False
         except jwt.InvalidTokenError:

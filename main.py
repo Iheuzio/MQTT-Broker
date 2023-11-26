@@ -5,6 +5,12 @@ from encryption_keys import generate_key_pair, load_keys, sign, verify
 from publisher import Publisher
 from subscriber import Subscriber
 from dashboard import Dashboard
+from Light import Light
+from Camera import Camera
+
+global light, camera
+light = Light()
+camera = Camera()
 
 exit_event = threading.Event()
 def signal_handler(signum, frame):
@@ -21,10 +27,6 @@ private_key, public_key = load_keys(password)
 # signature = sign(message, private_key)
 # print(verify(signature, message, public_key))
 
-# code for traffic light
-
-
-# code for camera
 
 # test msg
 message = "testing"
@@ -55,6 +57,17 @@ message = "testing2"
 # if conditions are met, trigger publish
 # before publish, take picture and include path in the payload
 
-while not exit_event.is_set():
-    # check apis here
-    pass
+## The loop method creates the threads for the light and camera.
+## loop then checks for the conditions needed before starting each thread.
+def loop():
+    light_th = threading.Thread(target=light.loop, args=[exit_event])
+    light_th.start()
+    while not exit_event.is_set():
+        # GET from APIs here
+        if light.is_red(): # and movement (from API)
+            print("redlight + movement")
+            # camera thread will handle taking video, saving to file and publishing
+            camera_th = threading.Thread(target=camera.take_picture, args=[publisher])
+            camera_th.start()
+            time.sleep(3)
+loop()
