@@ -105,7 +105,7 @@ class Subscriber:
             self.__client.loop_stop()
             
     def get_jwt_token(self):
-        return self.__generate_jwt_token()
+        return self.__generate_jwt_token().encode("utf-8")
     
     def __generate_jwt_token(self):
         # Generate JWT token with expiration time
@@ -115,7 +115,7 @@ class Subscriber:
             "iat": datetime.utcnow(),
         }
         token = encode(payload, "your_secret_key", algorithm="HS256")
-        return decode(token, "your_secret_key", algorithms=["HS256"])
+        return token
     
 if __name__ == "__main__":
     # Instantiate Subscriber

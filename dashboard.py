@@ -47,12 +47,7 @@ class Dashboard:
                 interval=5 * 1000,  # in milliseconds
                 n_intervals=0
             ),
-            html.Div([
-                dcc.Location(id='url', refresh=False),
-                html.Div([
-                    dcc.Link('Motion Detection', href='http://localhost:5000/motiondetection?postal_code=M5S1A1')
-                ], style={'marginTop': '5%'}),
-            ], style={'marginTop': '5%'})
+            html.Div(id='motion-detection')
         ], style={
             'display': 'flex',
             'flexDirection': 'row',
@@ -67,6 +62,8 @@ class Dashboard:
                 Output(f'my-thermometer-{i}-conditions', 'children') for i in range(1, 2)
             ] + [
                 Output(f'my-thermometer-{i}-intensities', 'children') for i in range(1, 2)
+            ] + [
+                Output('motion-detection', 'children')
             ],
             Input('interval-component', 'n_intervals')
         )
@@ -78,16 +75,19 @@ class Dashboard:
             self.time = datetime.datetime.now()  # Update the time
 
             try:
-                # Get the JWT token from the subscriber instance
-                jwt_token = self.subscriber.get_jwt_token()  # Replace with the actual method in your Subscriber class
-                # Convert the JWT token to a string
-                jwt_token_str = json.dumps(jwt_token)
-
-                headers = {'Authorization': jwt_token_str}
+## Get the JWT token from the subscriber instance
+                ## Get the JWT token from the subscriber instance
+                jwt_token = self.subscriber.get_jwt_token()
+                jwt_token_str = jwt_token.decode("utf-8")
+                headers = {'Authorization': 'Bearer ' + jwt_token_str}
                 url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
                 response = requests.get(url, headers=headers)
                 response_json = response.json()
                 print(response_json)
+                
+                url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
+                response_motion = requests.get(url_motion, headers=headers)
+                response_motion_json = response_motion.json()
             except Exception as e:
                 raise Exception(f'Could not connect to the server: {str(e)}')
 
@@ -95,19 +95,19 @@ class Dashboard:
             dates = []
             conditions = []
             intensities = []
-
+            motiondetection = []
             try:
                 values.append(response_json['TemperatureC'])  # Use 'TemperatureC' here
                 dates.append(response_json['Datetime'])  # Use 'Datetime' here
                 conditions.append(response_json['Conditions'])  # Use 'Conditions' here
                 intensities.append(response_json['Intensity'])  # Use 'Intensity' here
+                motiondetection.append(response_motion_json['motion_detected'])
             except KeyError as e:
                 # Handle the case where the key is not present in the response_json
                 print(f"KeyError: {str(e)}")
                 return no_update
 
-            return [value for value in values + dates + conditions + intensities]
-
+            return [value for value in values + dates + conditions + intensities + motiondetection]
 
     def run_dashboard(self):
         self.app.run_server(debug=False, host='localhost', threaded=False)
