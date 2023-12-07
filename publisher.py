@@ -10,7 +10,7 @@ import base64
 
 class Publisher:
     def __init__(self, private_key, public_key, jwt_token):
-        self.__broker_hostname = "172.19.0.1"
+        self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
         self.__topic = None

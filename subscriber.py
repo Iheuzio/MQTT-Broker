@@ -13,7 +13,7 @@ from jwt import encode, decode
 
 class Subscriber:
     def __init__(self):
-        self.__broker_hostname = "172.19.0.1"#"172.18.192.1"
+        self.__broker_hostname = "localhost"#"172.18.192.1"
         self.__port = 1883
         self.__client = mqtt.Client(client_id="Client2", userdata=None)
         self.__client.on_connect = self.__on_connect
