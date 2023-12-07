@@ -43,6 +43,7 @@ sudo docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps
 
 ```bash
 mkdir video
+mkdir keys
 ```
 
 6. Start the Main Application
@@ -85,6 +86,7 @@ docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --bu
 
 ```bash
 mkdir video
+mkdir keys
 ```
 
 6. Start the dashboard
