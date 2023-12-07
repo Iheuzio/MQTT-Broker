@@ -78,9 +78,9 @@ class Dashboard:
             try:
                 # Retrieve data from the Subscriber
                 response_json = self.subscriber.get_weather_forecast_message()
-                print(response_json)
+                #print(response_json)
                 response_motion_json = self.subscriber.get_motion_detection_message()
-                print(response_motion_json)
+                #print(response_motion_json)
             except Exception as e:
                 raise Exception(f'Could not connect to the server: {str(e)}')
 
