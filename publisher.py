@@ -13,6 +13,7 @@ class Publisher:
         self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
+        self.__topic = None
         self.__message = None
         self.__public_key = public_key
         self.__jwt_token = jwt_token
@@ -56,35 +57,39 @@ class Publisher:
         else:
             print("Could not connect, return code:", return_code)
 
-    def loop(self, exit_event, message, topic):
+    def loop(self, exit_event):
         public_key_sent = False
         self.__client.loop_start()
-        if exit_event.is_set():
-            self.__client.loop_stop()
-        payload = message
-        result = self.__client.publish(topic=topic, payload=self.sign_payload(payload))
-        status = result.rc
-
+        
         try:
-            if not public_key_sent:
-                topic = "public-keys/Client1"
-                payload = str(self.__public_key)
-            else:
-                topic = "event/Client1"
-            try:
-                self.fetch_motion_detection()
-                self.fetch_weather_forecast()
-            except Exception as e:
-                print(f'Could not connect to the server: {str(e)}')
-            # Publish weather forecast data
-            weather_forecast_payload = json.dumps(self.weather_forecast_data)
-            self.publish_message("weather-forecast", self.sign_payload(weather_forecast_payload))
+            while not exit_event.is_set():
+                if exit_event.is_set():
+                    self.__client.loop_stop()
+                if not public_key_sent:
+                    print("\n\nSending public key")
+                    topic = "public-keys/Client1"
+                    payload = str(self.__public_key)
+                    result = self.__client.publish(topic=topic, payload=self.sign_payload(payload))
+                    public_key_sent = True
+                else:
+                    if self.__topic:
+                        result = self.__client.publish(topic=self.__topic, payload=self.sign_payload(str(self.__message)))
+                        self.__topic = None
+                try:
+                    self.fetch_motion_detection()
+                    self.fetch_weather_forecast()
+                except Exception as e:
+                    print(f'Could not connect to the server: {str(e)}')
+                # Publish weather forecast data
+                weather_forecast_payload = json.dumps(self.weather_forecast_data)
+                self.publish_message("weather-forecast", self.sign_payload(weather_forecast_payload))
 
-            # Publish motion detection data
-            motion_detection_payload = json.dumps(self.motion_detection_data)
-            self.publish_message("motion-detection", self.sign_payload(motion_detection_payload))
+                # Publish motion detection data
+                motion_detection_payload = json.dumps(self.motion_detection_data)
+                self.publish_message("motion-detection", self.sign_payload(motion_detection_payload))
 
         finally:
+            print("\nstopped publisher\n")
             self.__client.loop_stop()
 
     def publish_traffic_violation(self, timestamp, filename):
