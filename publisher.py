@@ -9,7 +9,38 @@ from cryptography.hazmat.primitives import hashes
 import base64
 
 class Publisher:
+    """
+    The Publisher class is responsible for publishing messages to MQTT topics.
+
+    Attributes:
+        __broker_hostname (str): The hostname of the MQTT broker.
+        __port (int): The port number of the MQTT broker.
+        __private_key (bytes): The private key used for signing payloads.
+        __message (dict): The message to be published.
+        __public_key (str): The public key associated with the publisher.
+        __jwt_token (bytes): The JWT token used for authentication.
+        __client (mqtt.Client): The MQTT client instance.
+
+    Methods:
+        fetch_weather_forecast: Fetches weather forecast data from an API.
+        fetch_motion_detection: Fetches motion detection data from an API.
+        __on_connect: Callback function called when the client connects to the broker.
+        loop: Starts the MQTT client loop and publishes messages.
+        publish_traffic_violation: Publishes a traffic violation event.
+        publish_collision: Publishes a collision event.
+        sign_payload: Signs the payload using the private key.
+        publish_message: Publishes a message to an MQTT topic.
+    """
+
     def __init__(self, private_key, public_key, jwt_token):
+        """
+        Initializes a new instance of the Publisher class.
+
+        Args:
+            private_key (bytes): The private key used for signing payloads.
+            public_key (str): The public key associated with the publisher.
+            jwt_token (bytes): The JWT token used for authentication.
+        """
         self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
@@ -24,6 +55,12 @@ class Publisher:
         self.motion_detection_data = self.fetch_motion_detection()
 
     def fetch_weather_forecast(self):
+        """
+        Fetches weather forecast data from an API.
+
+        Returns:
+            dict: The weather forecast data.
+        """
         jwt_token_str = self.__jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
@@ -32,6 +69,12 @@ class Publisher:
         return response
 
     def fetch_motion_detection(self):
+        """
+        Fetches motion detection data from an API.
+
+        Returns:
+            dict: The motion detection data.
+        """
         jwt_token_str = self.__jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
@@ -40,6 +83,15 @@ class Publisher:
         return response_motion
     
     def __on_connect(self, client, userdata, flags, return_code):
+        """
+        Callback function called when the client connects to the broker.
+
+        Args:
+            client (mqtt.Client): The MQTT client instance.
+            userdata: The user data associated with the client.
+            flags: The flags associated with the connection.
+            return_code: The return code indicating the connection status.
+        """
         print("CONNACK received with code %s." % return_code)
         if return_code == 0:
             print("Publisher connected")
@@ -57,6 +109,14 @@ class Publisher:
             print("Could not connect, return code:", return_code)
 
     def loop(self, exit_event, message, topic):
+        """
+        Starts the MQTT client loop and publishes messages.
+
+        Args:
+            exit_event: The event used to signal the loop to exit.
+            message: The message to be published.
+            topic: The MQTT topic to publish the message to.
+        """
         public_key_sent = False
         self.__client.loop_start()
         if exit_event.is_set():
@@ -88,6 +148,13 @@ class Publisher:
             self.__client.loop_stop()
 
     def publish_traffic_violation(self, timestamp, filename):
+        """
+        Publishes a traffic violation event.
+
+        Args:
+            timestamp: The timestamp of the event.
+            filename: The filename associated with the event.
+        """
         self.__topic = "event/Client1/traffic-violation"
         obj = {
             "type": "Traffic Violation",
@@ -98,6 +165,13 @@ class Publisher:
         print(f"publishing {self.__message}")
 
     def publish_collision(self, timestamp, weather):
+        """
+        Publishes a collision event.
+
+        Args:
+            timestamp: The timestamp of the event.
+            weather: The weather condition associated with the event.
+        """
         self.__topic = "event/Client1/collision"
         obj = {
             "type": "Collision",
@@ -108,6 +182,15 @@ class Publisher:
         print(f"publishing collision {self.__message}")
 
     def sign_payload(self, payload):
+        """
+        Signs the payload using the private key.
+
+        Args:
+            payload: The payload to be signed.
+
+        Returns:
+            str: The signed payload.
+        """
         # Replace with your actual private key
         private_key_bytes = b"keys/private.pem"
 
@@ -138,6 +221,13 @@ class Publisher:
 
     
     def publish_message(self, topic, payload):
+        """
+        Publishes a message to an MQTT topic.
+
+        Args:
+            topic: The MQTT topic to publish the message to.
+            payload: The payload of the message.
+        """
         result = self.__client.publish(topic=topic, payload=payload)
         status = result.rc
         if status == mqtt.MQTT_ERR_SUCCESS:

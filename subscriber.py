@@ -12,6 +12,26 @@ from cryptography.hazmat.primitives import hashes
 from jwt import encode, decode
 
 class Subscriber:
+    """_summary_
+    The Subscriber class is responsible for subscribing to MQTT topics and receiving messages.
+    Attributes:
+        __broker_hostname (str): The hostname of the MQTT broker.
+        __port (int): The port number of the MQTT broker.
+        __client (mqtt.Client): The MQTT client instance.
+        __jwt_token (bytes): The JWT token used for authentication.
+        __weather_forecast_data (dict): The weather forecast data received from the publisher.
+        __motion_detection_data (dict): The motion detection data received from the publisher.
+    Methods:
+        __on_connect: Callback function called when the client connects to the broker.
+        __on_message: Callback function called when the client receives a message from the broker.
+        loop: Starts the MQTT client loop and receives messages.
+        get_jwt_token: Returns the JWT token.
+        __generate_jwt_token: Generates a new JWT token.
+        __validate_jwt_token: Validates the JWT token.
+        __verify_signature: Verifies the digital signature.
+        get_weather_forecast_message: Returns the weather forecast message.
+        get_motion_detection_message: Returns the motion detection message.
+    """
     def __init__(self):
         self.__broker_hostname = "localhost"
         self.__port = 1883
@@ -25,6 +45,16 @@ class Subscriber:
         self.__weather_forecast_data = None
         self.__motion_detection_data = None
 
+    """_summary_
+      This function is called when the client connects to the broker.
+      Args:
+          client (mqtt.Client): The MQTT client instance.
+          userdata (Any): User data of any type.
+          flags (dict): Response flags sent by the broker.
+          return_code (int): The connection result.
+      Returns:
+          None
+    """
     def __on_connect(self, client, userdata, flags, return_code):
         if return_code == 0:
             print("subsciber connected")
@@ -35,7 +65,15 @@ class Subscriber:
             client.subscribe("motion-detection")
         else:
             print("Could not connect, return code:", return_code)
-
+    """_summary_
+      This function is called when the client receives a message from the broker.
+      Args:
+          client (mqtt.Client): The MQTT client instance.
+          userdata (Any): User data of any type.
+          message (mqtt.MQTTMessage): An instance of MQTTMessage.
+      Returns:
+          None
+    """
     def __on_message(self, client, userdata, message):
         payload = message.payload.decode("utf-8")
 
@@ -62,6 +100,13 @@ class Subscriber:
             self.__motion_detection_data = json.loads(payload)
             print("Received motion detection:", self.__motion_detection_data)
 
+    """_summary_
+      This function is used to validate the JWT token.
+      Args:
+          token (str): The JWT token. 
+      Returns:
+          bool: True if the token is valid, False otherwise.
+    """
     def __validate_jwt_token(self, token):
         try:
             decoded_token = decode(token, verify=False)
@@ -71,6 +116,13 @@ class Subscriber:
         except jwt.InvalidTokenError:
             return False
 
+    """_summary_
+      This function is used to verify the digital signature.
+      Args:
+          payload (str): The payload containing the digital signature and the message.
+      Returns:
+          bool: True if the signature is valid, False otherwise.
+    """
     def __verify_signature(self, payload):
         try:
             # Load the public key content from the file
@@ -100,6 +152,13 @@ class Subscriber:
             print("Signature verification error:", e)
             return False
 
+    """_summary_
+      This function starts the MQTT client loop and receives messages.
+      Args:
+          exit_event (threading.Event): The event used to stop the loop.
+      Returns:
+          None
+    """
     def loop(self, exit_event):
         self.__client.loop_start()
         if exit_event.is_set():
@@ -119,14 +178,27 @@ class Subscriber:
                 time.sleep(1)
         finally:
             self.__client.loop_stop()
-
+    """_summary_
+      This function returns the JWT token.
+      Args:
+          None
+      Returns:
+          bytes: The JWT token.
+    """
     def get_jwt_token(self):
         # if it is None then generate one
         if self.__jwt_token is None:
             self.__jwt_token = self.__generate_jwt_token()
             self.__jwt_token = self.__jwt_token.encode("utf-8")
         return self.__jwt_token
-
+    
+    """_summary_
+      This function generates a new JWT token.
+      Args:
+          None
+      Returns:
+          bytes: The JWT token.
+    """
     def __generate_jwt_token(self):
         # Generate JWT token with expiration time
         expiration_time = datetime.utcnow() + timedelta(hours=1)
@@ -137,12 +209,26 @@ class Subscriber:
         token = encode(payload, "your_secret_key", algorithm="HS256")
         return token
 
+    """_summary_
+      This function returns the weather forecast message.
+      Args:
+          None
+      Returns:
+          dict: The weather forecast message.
+    """
     def get_weather_forecast_message(self):
         if self.__weather_forecast_data is None:
             # return 401 error
             return "No data", 401
         return self.__weather_forecast_data
     
+    """_summary_
+      This function returns the motion detection message.
+      Args:
+          None
+      Returns:
+          dict: The motion detection message.
+    """
     def get_motion_detection_message(self):
         if self.__motion_detection_data is None:
             # return 401 error

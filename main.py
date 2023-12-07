@@ -52,6 +52,10 @@ dashboard_th.start()
 ## The loop method creates the threads for the light and camera.
 ## loop then checks for the conditions needed before starting each thread.
 def loop():
+    """
+    This function runs a loop that fetches data from APIs, checks for motion and collision events,
+    and performs corresponding actions based on the events detected.
+    """
     light_th = threading.Thread(target=light.loop, args=[exit_event])
     light_th.start()
     while not exit_event.is_set():

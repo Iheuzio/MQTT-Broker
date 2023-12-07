@@ -18,6 +18,23 @@ _postalCodes = ["M9A1A8", "M5S1A1", "M4W1A5", "M6G1A1", "M5R1A6"]
 
 
 def authorize_jwt_token(f):
+    """
+    Decorator function to authorize JWT token.
+
+    This function checks if a valid JWT token is present in the request headers.
+    If the token is missing or invalid, it returns an error response.
+    If the token has expired, it returns an error response.
+
+    Args:
+        f (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function.
+
+    Raises:
+        jwt.InvalidTokenError: If the token is invalid.
+
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get("Authorization")
@@ -40,6 +57,11 @@ def authorize_jwt_token(f):
 
     return decorated_function
 
+"""_summary_
+    This function is used to get the weather forecast for a given postal code.
+Returns:
+    _type_: _description_
+"""
 @app.route('/weather-forecast/postal-code/<postalCode>', methods=['GET'])
 @authorize_jwt_token
 def get_weather_forecast(postalCode):
@@ -60,6 +82,11 @@ def get_weather_forecast(postalCode):
         "PostalCode": postalCode
     })
 
+"""_summary_
+    This function is used to get the motion detection for a given postal code.
+Returns:
+    _type_: _description_
+"""
 @app.route('/motiondetection', methods=['GET'])
 @authorize_jwt_token
 def motion_detection():
