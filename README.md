@@ -87,7 +87,7 @@ docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --bu
 mkdir video
 ```
 
-5. Start the dashboard
+6. Start the dashboard
 
 ```bash
 python main.py
