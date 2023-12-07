@@ -32,16 +32,18 @@ class Publisher:
         jwt_token_str = jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
-        response = requests.get(url, headers=headers)
-        self.weather_forecast_data = response.json()
+        response = requests.get(url, headers=headers).json()
+        self.weather_forecast_data = response
+        return response
 
     def fetch_motion_detection(self):
         jwt_token = self.__subscriber.get_jwt_token()
         jwt_token_str = jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
-        response_motion = requests.get(url_motion, headers=headers)
-        self.motion_detection_data = response_motion.json()
+        response_motion = requests.get(url_motion, headers=headers).json()
+        self.motion_detection_data = response_motion
+        return response_motion
     
     def __on_connect(self, client, userdata, flags, return_code):
         print("CONNACK received with code %s." % return_code)

@@ -4,3 +4,16 @@ A car passed in red at 2023-11-25-23.04.29; check the record of the traffic offe
 A car passed in red at 2023-11-25-23.22.12; check the record of the traffic offense in ./video/2023-11-25-23.22.12.h264
 A car passed in red at 2023-11-25-23.22.27; check the record of the traffic offense in ./video/2023-11-25-23.22.27.h264
 A car passed in red at 2023-11-25-23.22.42; check the record of the traffic offense in ./video/2023-11-25-23.22.42.h264
+A car passed in red at 2023-12-07-00.30.56; check the record of the traffic offense in ./video/2023-12-07-00.30.56.h264
+A car passed in red at 2023-12-07-00.31.16; check the record of the traffic offense in ./video/2023-12-07-00.31.16.h264
+A car passed in red at 2023-12-07-00.35.53; check the record of the traffic offense in ./video/2023-12-07-00.35.53.h264
+A car passed in red at 2023-12-07-00.36.26; check the record of the traffic offense in ./video/2023-12-07-00.36.26.h264
+A car passed in red at 2023-12-07-00.37.33; check the record of the traffic offense in ./video/2023-12-07-00.37.33.h264
+A car passed in red at 2023-12-07-00.37.48; check the record of the traffic offense in ./video/2023-12-07-00.37.48.h264
+A car passed in red at 2023-12-07-00.38.03; check the record of the traffic offense in ./video/2023-12-07-00.38.03.h264
+A car passed in red at 2023-12-07-00.38.48; check the record of the traffic offense in ./video/2023-12-07-00.38.48.h264
+A car passed in red at 2023-12-07-00.39.03; check the record of the traffic offense in ./video/2023-12-07-00.39.03.h264
+A car passed in red at 2023-12-07-00.40.07; check the record of the traffic offense in ./video/2023-12-07-00.40.07.h264
+A car passed in red at 2023-12-07-00.48.16; check the record of the traffic offense in ./video/2023-12-07-00.48.16.h264
+A car passed in red at 2023-12-07-00.48.31; check the record of the traffic offense in ./video/2023-12-07-00.48.31.h264
+A car passed in red at 2023-12-07-00.48.46; check the record of the traffic offense in ./video/2023-12-07-00.48.46.h264
