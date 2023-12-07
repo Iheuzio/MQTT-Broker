@@ -21,7 +21,8 @@ class Camera:
         filename = datetime.datetime.now() .strftime ("./video/%Y-%m-%d-%H.%M.%S.h264")
 
         # starts recording 3 second video
-        self.__camera.start_recording(self.__encoder, filename)
+        if not self.__encoder.running:
+            self.__camera.start_recording(self.__encoder, filename)
         print ("A car passed in red at  :  %s" % filename)
         
         # Information is written to a file named traffic_log.txt, if the file does exist, it is created

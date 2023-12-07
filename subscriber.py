@@ -33,7 +33,7 @@ class Subscriber:
         get_motion_detection_message: Returns the motion detection message.
     """
     def __init__(self):
-        self.__broker_hostname = "localhost"
+        self.__broker_hostname = "localhost"#"172.18.192.1"
         self.__port = 1883
         self.__client = mqtt.Client(client_id="Client2", userdata=None)
         self.__client.on_connect = self.__on_connect
@@ -75,6 +75,8 @@ class Subscriber:
           None
     """
     def __on_message(self, client, userdata, message):
+        
+        print('got message on ' + message.topic)
         payload = message.payload.decode("utf-8")
 
         if message.topic == "jwt-token":
@@ -84,13 +86,19 @@ class Subscriber:
                 print("JWT token is valid")
                 self.__jwt_token = payload
 
+        elif message.topic == "public-keys/Client1":
+            print("got public key")
+
+        elif message.topic == "event/Client1":
+            print(payload)
+
         elif message.topic == "weather-forecast":
             if not self.__verify_signature(payload):
                 print("Digital signature verification failed for weather-forecast")
                 return
 
             self.__weather_forecast_data = json.loads(payload)
-            print("Received weather forecast:", self.__weather_forecast_data)
+            #print("Received weather forecast:", self.__weather_forecast_data)
 
         elif message.topic == "motion-detection":
             if not self.__verify_signature(payload):
@@ -98,7 +106,7 @@ class Subscriber:
                 return
 
             self.__motion_detection_data = json.loads(payload)
-            print("Received motion detection:", self.__motion_detection_data)
+            #print("Received motion detection:", self.__motion_detection_data)
 
     """_summary_
       This function is used to validate the JWT token.
@@ -161,22 +169,24 @@ class Subscriber:
     """
     def loop(self, exit_event):
         self.__client.loop_start()
-        if exit_event.is_set():
-            self.__client.loop_stop()
         try:
             while not exit_event.is_set():
-                weather_forecast_data = self.__weather_forecast_data
-                motion_detection_data = self.__motion_detection_data
+                if exit_event.is_set():
+                    self.__client.loop_stop()
+            weather_forecast_data = self.__weather_forecast_data
+            motion_detection_data = self.__motion_detection_data
 
-                # Update dashboard with the latest data
-                if weather_forecast_data:
-                    return weather_forecast_data
+            # Update dashboard with the latest data
+            if weather_forecast_data:
+                return weather_forecast_data
 
-                if motion_detection_data:
-                    return motion_detection_data
+            if motion_detection_data:
+                return motion_detection_data
 
-                time.sleep(1)
+            time.sleep(1)
         finally:
+            print("\nstopped subscriber\n")
+
             self.__client.loop_stop()
     """_summary_
       This function returns the JWT token.
