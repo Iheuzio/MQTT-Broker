@@ -80,3 +80,7 @@ docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --bu
 ```bash
 python main.py
 ```
+
+### UML
+
+![UML diagram](./images/finalclass.jpg)
