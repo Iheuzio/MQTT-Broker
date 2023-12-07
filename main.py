@@ -23,12 +23,13 @@ generate_key_pair(password)
 # load private and public keys
 private_key, public_key = load_keys(password)
 subscriber = Subscriber()
+jwt_token = subscriber.get_jwt_token()
 
 # test msg
 message = "testing"
 
 # launch publisher in a thread
-publisher = Publisher(private_key, public_key, subscriber)
+publisher = Publisher(private_key, public_key, jwt_token)
 publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message, "event/Client1"])
 publisher_th.start()
 
