@@ -85,7 +85,6 @@ class Publisher:
             self.publish_message("motion-detection", self.sign_payload(motion_detection_payload))
 
         finally:
-            print("finally publisher")
             self.__client.loop_stop()
 
     def publish_traffic_violation(self, timestamp, filename):

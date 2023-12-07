@@ -118,7 +118,6 @@ class Subscriber:
 
                 time.sleep(1)
         finally:
-            print("finally subscriber")
             self.__client.loop_stop()
 
     def get_jwt_token(self):
