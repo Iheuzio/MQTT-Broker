@@ -39,7 +39,13 @@ sudo docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps -
 sudo docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
 ```
 
-5. Start the Main Application
+5. Make a directory for video file output
+
+```bash
+mkdir video
+```
+
+6. Start the Main Application
 
 ```bash
 python3 main.py
@@ -73,6 +79,12 @@ pip install -r requirements.txt
 ```bash
 docker compose -f py_api/docker-compose.yml up --force-recreate --no-deps --build -d
 docker compose -f mqtt_lab/docker-compose.yml up --force-recreate --no-deps --build -d
+```
+
+5. Make a folder for video file output
+
+```bash
+mkdir video
 ```
 
 5. Start the dashboard
