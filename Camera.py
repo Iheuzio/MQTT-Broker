@@ -2,9 +2,6 @@ import time
 import datetime
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
-import os
-import subprocess
-
 
 ## The Camera class contains code that is used to record and save a video 
 ## using the camera. Camera also creates and saves a text file containing information about the video
@@ -37,10 +34,12 @@ class Camera:
 
         # starts recording 3 second video
         self.__camera.stop_recording()
+        if self.__encoder.running:
+            self.__encoder.stop()
 
         # print path to where file was saved
         print ("File Saved in :  %s" % filename)
 
         # publish
-        publisher.publish_traffic_violation(filename)
+        publisher.publish_traffic_violation(timestamp, filename)
 

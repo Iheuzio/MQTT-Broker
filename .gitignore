@@ -532,3 +532,5 @@ mqtt_lab/mosquitto/data/*
 video/*
 
 mosquitto.db
+
+traffic_log.txt

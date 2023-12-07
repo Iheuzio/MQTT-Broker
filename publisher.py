@@ -1,8 +1,5 @@
-import threading
 import paho.mqtt.client as mqtt
-import time
 import json
-from datetime import datetime, timedelta
 from jwt import encode, decode
 import requests
 from cryptography.hazmat.backends import default_backend
@@ -12,14 +9,13 @@ from cryptography.hazmat.primitives import hashes
 import base64
 
 class Publisher:
-    def __init__(self, private_key, public_key, subscriber):
+    def __init__(self, private_key, public_key, jwt_token):
         self.__broker_hostname = "localhost"
         self.__port = 1883
         self.__private_key = private_key
         self.__message = None
-        self.__topic = "event/Client1"
         self.__public_key = public_key
-        self.__subscriber = subscriber
+        self.__jwt_token = jwt_token
         self.__client = mqtt.Client(client_id="Client1", userdata=None)
         self.__client.on_connect = self.__on_connect
         self.__client.username_pw_set(username="user_name", password="password")
@@ -28,29 +24,28 @@ class Publisher:
         self.motion_detection_data = self.fetch_motion_detection()
 
     def fetch_weather_forecast(self):
-        jwt_token = self.__subscriber.get_jwt_token()
-        jwt_token_str = jwt_token.decode("utf-8")
+        jwt_token_str = self.__jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url = "http://localhost:5000/weather-forecast/postal-code/M5S1A1"
-        response = requests.get(url, headers=headers)
-        self.weather_forecast_data = response.json()
+        response = requests.get(url, headers=headers).json()
+        self.weather_forecast_data = response
+        return response
 
     def fetch_motion_detection(self):
-        jwt_token = self.__subscriber.get_jwt_token()
-        jwt_token_str = jwt_token.decode("utf-8")
+        jwt_token_str = self.__jwt_token.decode("utf-8")
         headers = {'Authorization': 'Bearer ' + jwt_token_str}
         url_motion = "http://localhost:5000/motiondetection?postal_code=M5S1A1"
-        response_motion = requests.get(url_motion, headers=headers)
-        self.motion_detection_data = response_motion.json()
+        response_motion = requests.get(url_motion, headers=headers).json()
+        self.motion_detection_data = response_motion
+        return response_motion
     
     def __on_connect(self, client, userdata, flags, return_code):
         print("CONNACK received with code %s." % return_code)
         if return_code == 0:
             print("Publisher connected")
-            jwt_token = self.__subscriber.get_jwt_token()
-            if jwt_token:
+            if self.__jwt_token:
                 topic = "jwt-token"
-                result = self.__client.publish(topic=topic, payload=str(jwt_token))
+                result = self.__client.publish(topic=topic, payload=str(self.__jwt_token))
                 status = result.rc
                 if status == mqtt.MQTT_ERR_SUCCESS:
                     print("JWT token is published to topic " + topic)
@@ -90,7 +85,6 @@ class Publisher:
             self.publish_message("motion-detection", self.sign_payload(motion_detection_payload))
 
         finally:
-            print("finally publisher")
             self.__client.loop_stop()
 
     def publish_traffic_violation(self, timestamp, filename):
@@ -120,14 +114,11 @@ class Publisher:
         with open(private_key_bytes, "rb") as key_file:
             private_key_content = key_file.read()
 
-
         private_key = serialization.load_pem_private_key(
             private_key_content,
             password=b'password123',  # replace 'your_password' with your actual password
             backend=default_backend()
         )
-
-
 
         signature = private_key.sign(
             payload.encode("utf-8"),

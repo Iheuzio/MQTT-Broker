@@ -22,17 +22,14 @@ password = b"password123"
 generate_key_pair(password)
 # load private and public keys
 private_key, public_key = load_keys(password)
-# test
-# message = b"hello wrld"
-# signature = sign(message, private_key)
-# print(verify(signature, message, public_key))
 subscriber = Subscriber()
+jwt_token = subscriber.get_jwt_token()
 
 # test msg
 message = "testing"
 
 # launch publisher in a thread
-publisher = Publisher(private_key, public_key, subscriber)
+publisher = Publisher(private_key, public_key, jwt_token)
 publisher_th = threading.Thread(target=publisher.loop, args=[exit_event, message, "event/Client1"])
 publisher_th.start()
 
@@ -48,9 +45,6 @@ def run_dashboard():
 dashboard_th = threading.Thread(target=run_dashboard)
 dashboard_th.start()
 
-# test msg
-message = "testing2"
-
 # loop with traffic light, constantly checking the api's
 # if conditions are met, trigger publish
 # before publish, take picture and include path in the payload
@@ -62,10 +56,15 @@ def loop():
     light_th.start()
     while not exit_event.is_set():
         # GET from APIs here
-        is_collision = True
-        is_movement = False
-        timestamp = "time from api"
-        weather = "weather from api"
+        motion_api_response = publisher.fetch_motion_detection()
+        weather_api_response = publisher.fetch_weather_forecast()
+        is_collision, is_movement = False, False
+        if motion_api_response:
+            is_collision = motion_api_response['detection']['type'] == 'collision' and motion_api_response['detection']['value']
+            is_movement = motion_api_response['detection']['type'] == 'motion' and motion_api_response['detection']['value']
+        if weather_api_response:
+            timestamp = weather_api_response['Datetime']
+            weather = f"{weather_api_response['TemperatureC']}˚C {'' if weather_api_response['Intensity'] == 'n/a' else  weather_api_response['Intensity']} {weather_api_response['Conditions']}"
         if light.is_red() and is_movement: # and movement (from API)
             print("redlight + movement")
             # camera thread will handle taking video, saving to file and publishing
@@ -73,6 +72,7 @@ def loop():
             camera_th.start()
             time.sleep(3)
         elif is_collision:
+            print("collision")
             publisher.publish_collision(timestamp, weather)
         time.sleep(1)
 loop()
